@@ -12,10 +12,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-RUN mkdir -p storage/framework/{cache,sessions,views} \
-    && mkdir -p bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+# WAJIB: struktur Laravel hidup dulu
+RUN mkdir -p \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache
 
+RUN chmod -R 775 storage bootstrap/cache
+
+# composer TANPA artisan trigger
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 EXPOSE 8080
@@ -23,4 +29,5 @@ EXPOSE 8080
 CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan view:clear && \
+    php artisan optimize && \
     php artisan serve --host=0.0.0.0 --port=8080
