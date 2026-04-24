@@ -93,9 +93,9 @@ class PatrolResource extends Resource
                                         ->label('Grup Shift')
                                         ->content(function () {
                                             $hour = (int) now()->format('G');
-                                            if ($hour >= 7 && $hour < 15) return '🟢  Shift 1 — 07:00 s/d 14:59';
-                                            if ($hour >= 15 && $hour < 23) return '🟡  Shift 2 — 15:00 s/d 22:59';
-                                            return '🔵  Shift 3 — 23:00 s/d 06:59';
+                                            if ($hour >= 7 && $hour < 15) return '🟢  Shift 1 — 07:00 s/d 15:00';
+                                            if ($hour >= 15 && $hour < 23) return '🟡  Shift 2 — 15:00 s/d 23:00';
+                                            return '🔵  Shift 3 — 23:00 s/d 07:00';
                                         })
                                         ->helperText('Terdeteksi otomatis dari jam saat ini')
                                         ->visibleOn('create'),
