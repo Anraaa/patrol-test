@@ -354,7 +354,7 @@
     </div>
 
     <script>
-        const VALIDATE_URL = '{{ route("patrol.qr-validate-gps", ["uuid" => $location->uuid]) }}';
+        const VALIDATE_URL = '/scan-qr/{{ $location->uuid }}/validate-gps';
         const CSRF_TOKEN   = '{{ csrf_token() }}';
 
         let redirectUrl      = null;
@@ -394,6 +394,10 @@
                     body: JSON.stringify({ latitude, longitude }),
                 });
 
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+
                 const data = await response.json();
 
                 if (data.valid) {
@@ -404,8 +408,8 @@
                 }
             } catch (err) {
                 showState('gpsError');
-                document.getElementById('gpsErrorDesc').textContent =
-                    'Gagal menghubungi server: ' + err.message;
+                document.getElementById('gpsErrorDesc').innerHTML =
+                    'Gagal menghubungi server untuk validasi jarak.<br><small style="color:#92400e">' + err.message + '</small>';
             }
         }
 

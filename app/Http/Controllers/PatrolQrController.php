@@ -141,11 +141,11 @@ class PatrolQrController extends Controller
             session()->put('qr_location_scanned_at', now()->timestamp);
 
             if (auth()->check()) {
-                $redirectUrl = route('filament.admin.resources.patrols.create', ['loc' => $uuid]);
+                $redirectUrl = '/admin/patrols/create?loc=' . $uuid;
             } else {
                 // Store intended URL so after login user lands on patrol form
                 session()->put('url.intended', route('filament.admin.resources.patrols.create', ['loc' => $uuid]));
-                $redirectUrl = route('filament.admin.auth.login');
+                $redirectUrl = '/admin/login';
             }
 
             return response()->json([
