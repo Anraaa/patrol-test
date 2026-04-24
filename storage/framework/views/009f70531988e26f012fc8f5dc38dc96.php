@@ -552,10 +552,14 @@
         
         <?php
             $picSummary = [];
+            // Hanya include users yang ada di $picColors (users dengan data)
             foreach ($data['users'] as $user) {
+                if (!isset($picColors[$user->name])) {
+                    continue; // Skip users tanpa data
+                }
                 $picSummary[$user->id] = [
                     'name' => $user->name,
-                    'color_idx' => $picColors[$user->name] ?? 0,
+                    'color_idx' => $picColors[$user->name],
                     'total_locations' => count($data['locations']),
                     'locations_visited' => 0,
                     'total_shifts' => count($data['shifts']),
@@ -566,6 +570,9 @@
             }
 
             foreach ($data['users'] as $user) {
+                if (!isset($picColors[$user->name])) {
+                    continue; // Skip users tanpa data
+                }
                 $locationsVisited = \App\Models\Patrol::where('user_id', $user->id)
                     ->whereBetween('patrol_time', [
                         \Carbon\Carbon::create($data['year'], $data['month'], 1),

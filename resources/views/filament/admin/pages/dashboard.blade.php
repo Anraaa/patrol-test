@@ -895,16 +895,24 @@
         @if(count($picColors) > 0)
         <div class="overflow-hidden rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-xl">
             <div class="section-header-gradient px-5 py-3 border-b border-indigo-100 dark:border-indigo-900/30">
-                <div class="flex items-center gap-2">
-                    <div class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm" style="background: linear-gradient(135deg, #f43f5e, #fb923c);">
-                        <svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                        </svg>
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm" style="background: linear-gradient(135deg, #f43f5e, #fb923c);">
+                            <svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-black text-gray-700 dark:text-gray-300">Daftar Petugas</h3>
+                        <span class="text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
+                            {{ count($picColors) }} petugas
+                        </span>
+                        <span id="filter-info" class="hidden text-xs font-semibold bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">
+                            📌 Filter aktif
+                        </span>
                     </div>
-                    <h3 class="text-sm font-black text-gray-700 dark:text-gray-300">Daftar Petugas</h3>
-                    <span class="text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
-                        {{ count($picColors) }} petugas
-                    </span>
+                    <button id="reset-filter-btn" onclick="resetFilter()" class="hidden px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                        ✕ Reset Filter
+                    </button>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2.5 p-4" style="background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #fff1f8 100%);">
@@ -914,7 +922,7 @@
                         $cs       = $badgeBg[$colorKey];
                         $initials = collect(explode(' ', $picName))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
                     @endphp
-                    <div class="pic-badge flex items-center gap-2.5 rounded-xl border {{ $cs['border'] }} {{ $cs['bg'] }} pl-2 pr-4 py-1.5 shadow-md transition-all duration-200">
+                    <div class="pic-badge flex items-center gap-2.5 rounded-xl border {{ $cs['border'] }} {{ $cs['bg'] }} pl-2 pr-4 py-1.5 shadow-md transition-all duration-200 hover:shadow-lg hover:scale-105">
                         <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg {{ $avatarSolid[$colorKey] }} text-black text-[11px] font-black shadow-md">
                             {{ $initials }}
                         </span>
@@ -1036,6 +1044,7 @@
                         </div>
 
                         {{-- PIC Badges --}}
+                        @if($hasData)
                         <div class="space-y-1.5">
                             @foreach($showPics as $picName => $picData)
                                 @php
@@ -1070,6 +1079,7 @@
                                 </div>
                             @endif
                         </div>
+                        @endif
                     </div>
                 @endfor
 
@@ -1166,6 +1176,86 @@
 
         let selectedDay = null;
         let isAnimating = false;
+        let filteredUser = null; // Track petugas yang di-filter
+
+        // Setup event listeners untuk pic-badge
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFilterUI(); // Initialize filter UI
+            const badges = document.querySelectorAll('.pic-badge');
+            badges.forEach(badge => {
+                badge.style.cursor = 'pointer';
+                badge.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const picName = this.textContent.trim().split('\n')[1].trim();
+                    
+                    // Toggle filter
+                    if (filteredUser === picName) {
+                        filteredUser = null; // Reset ke semua
+                        this.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+                    } else {
+                        // Remove highlight dari yang sebelumnya
+                        document.querySelectorAll('.pic-badge').forEach(b => {
+                            b.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+                        });
+                        
+                        filteredUser = picName;
+                        this.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+                    }
+                    
+                    // Update calendar display
+                    updateCalendarFilter();
+                });
+            });
+        });
+
+        function updateCalendarFilter() {
+            const calendarCells = document.querySelectorAll('.cal-cell');
+            calendarCells.forEach(cell => {
+                if (!filteredUser) {
+                    // Tampil semua
+                    cell.style.opacity = '1';
+                    cell.style.pointerEvents = 'auto';
+                } else {
+                    // Check apakah cell ini berisi petugas yang di-filter
+                    const hasFilteredUser = Array.from(cell.querySelectorAll('.pic-badge')).some(badge => 
+                        badge.textContent.includes(filteredUser)
+                    );
+                    
+                    if (hasFilteredUser) {
+                        cell.style.opacity = '1';
+                        cell.style.pointerEvents = 'auto';
+                    } else {
+                        cell.style.opacity = '0.3';
+                        cell.style.pointerEvents = 'none';
+                    }
+                }
+            });
+            
+            // Update filter info dan reset button
+            updateFilterUI();
+        }
+
+        function updateFilterUI() {
+            const filterInfo = document.getElementById('filter-info');
+            const resetBtn = document.getElementById('reset-filter-btn');
+            
+            if (filteredUser) {
+                filterInfo.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
+            } else {
+                filterInfo.classList.add('hidden');
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        function resetFilter() {
+            filteredUser = null;
+            document.querySelectorAll('.pic-badge').forEach(badge => {
+                badge.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+            });
+            updateCalendarFilter();
+        }
+
 
         function selectDay(day) {
             if (isAnimating) return;
