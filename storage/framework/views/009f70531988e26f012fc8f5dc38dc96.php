@@ -1,5 +1,14 @@
-<x-filament-panels::page @refresh-component="$refresh">
-    @php
+<?php if (isset($component)) { $__componentOriginal166a02a7c5ef5a9331faf66fa665c256 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.index','data' => ['@refreshComponent' => '$refresh']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('filament-panels::page'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['@refresh-component' => '$refresh']); ?>
+    <?php
         $data = $this->getData();
 
         // ── Bangun calendarData ──────────────────────────────────────────────
@@ -97,9 +106,9 @@
             1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
             7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
         ];
-    @endphp
+    ?>
 
-    {{-- ── Inline Styles ─────────────────────────────────────────────────── --}}
+    
     <style>
         /* ===== COLORFUL THEME OVERRIDES ===== */
 
@@ -368,9 +377,9 @@
 
     <div class="space-y-6 custom-scroll">
 
-        {{-- ── HERO HEADER ─────────────────────────────────────────────── --}}
+        
         <div class="hero-header rounded-3xl p-6 lg:p-8 shadow-2xl">
-            {{-- Decorative bubbles --}}
+            
             <div class="bubble w-24 h-24 top-[-20px] right-[10%]" style="animation-duration:6s; animation-delay:0s;"></div>
             <div class="bubble w-16 h-16 bottom-[-10px] left-[15%]" style="animation-duration:8s; animation-delay:1s;"></div>
             <div class="bubble w-10 h-10 top-[30%] left-[5%]" style="animation-duration:5s; animation-delay:0.5s;"></div>
@@ -395,57 +404,58 @@
                         </div>
                     </div>
 
-                    {{-- Quick stats in header --}}
+                    
                     <div class="flex flex-wrap gap-2 mt-2">
                         <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
                             <span class="h-2 w-2 rounded-full bg-emerald-300 animate-pulse"></span>
-                            {{ $totalPatrolMonth }} Patrol Selesai
+                            <?php echo e($totalPatrolMonth); ?> Patrol Selesai
                         </span>
                         <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
                             <span class="h-2 w-2 rounded-full bg-rose-300"></span>
-                            {{ $totalMissedMonth }} Missed
+                            <?php echo e($totalMissedMonth); ?> Missed
                         </span>
                         <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
                             <span class="h-2 w-2 rounded-full bg-amber-300"></span>
-                            {{ $ratePercent }}% Rate
+                            <?php echo e($ratePercent); ?>% Rate
                         </span>
                     </div>
                 </div>
 
-                {{-- Month & Year Filter --}}
+                
                 <div class="flex items-center gap-2.5">
                     <div class="flex items-center gap-2 rounded-2xl bg-white/20 backdrop-blur-md shadow-lg p-2">
                         <select wire:model.live="selectedMonth"
                             class="rounded-xl border-0 bg-white/90 text-gray-800 px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-white/50 transition-all cursor-pointer shadow-sm">
-                            @foreach($this->getMonths() as $num => $name)
-                                <option value="{{ $num }}" @selected($num == $data['month'])>{{ $name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $this->getMonths(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $num => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($num); ?>" <?php if($num == $data['month']): echo 'selected'; endif; ?>><?php echo e($name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                         <div class="h-6 w-px bg-white/40"></div>
                         <select wire:model.live="selectedYear"
                             class="rounded-xl border-0 bg-white/90 text-gray-800 px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-white/50 transition-all cursor-pointer shadow-sm">
-                            @foreach($this->getYears() as $year)
-                                <option value="{{ $year }}" @selected($year == $data['year'])>{{ $year }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $this->getYears(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $year): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($year); ?>" <?php if($year == $data['year']): echo 'selected'; endif; ?>><?php echo e($year); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- ── SUMMARY STATS GRID ───────────────────────────────────────── --}}
+        
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-            {{-- Active Users Card - Blue/Cyan --}}
+            
             <div class="stat-card-colorful rounded-2xl p-5 shadow-xl" style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex-1">
                         <p class="text-xs font-bold uppercase tracking-wider text-blue-100 mb-2">User Aktif</p>
                         <div class="flex items-baseline gap-2">
                             <span class="text-4xl font-black text-white">
-                                {{ count(array_filter($data['table_data'], fn($row) => !empty(array_filter($row['daily_data'], fn($day) => in_array(1, $day['shifts_status']))))) }}
+                                <?php echo e(count(array_filter($data['table_data'], fn($row) => !empty(array_filter($row['daily_data'], fn($day) => in_array(1, $day['shifts_status'])))))); ?>
+
                             </span>
-                            <span class="text-xs font-semibold text-blue-200">dari {{ count($data['users']) }}</span>
+                            <span class="text-xs font-semibold text-blue-200">dari <?php echo e(count($data['users'])); ?></span>
                         </div>
                     </div>
                     <div class="stat-icon flex h-12 w-12 items-center justify-center rounded-xl shadow-md">
@@ -456,22 +466,22 @@
                 </div>
                 <p class="text-xs text-blue-200 font-semibold">User yang sudah melakukan patrol</p>
                 <div class="mt-3 h-1 w-full rounded-full bg-white/20 overflow-hidden">
-                    @php
+                    <?php
                         $activeUsers = count(array_filter($data['table_data'], fn($row) => !empty(array_filter($row['daily_data'], fn($day) => in_array(1, $day['shifts_status'])))));
                         $totalUsers = count($data['users']);
                         $activeRate = $totalUsers > 0 ? round(($activeUsers / $totalUsers) * 100) : 0;
-                    @endphp
-                    <div class="h-full bg-white/60 rounded-full" style="width: {{ $activeRate }}%; transition: width 0.8s ease;"></div>
+                    ?>
+                    <div class="h-full bg-white/60 rounded-full" style="width: <?php echo e($activeRate); ?>%; transition: width 0.8s ease;"></div>
                 </div>
             </div>
 
-            {{-- Total Petugas - Purple/Violet --}}
+            
             <div class="stat-card-colorful rounded-2xl p-5 shadow-xl" style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);">
                 <p class="text-xs font-bold uppercase tracking-wider text-violet-200 mb-3">Total Petugas</p>
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="flex items-baseline gap-2 mb-1">
-                            <span class="text-3xl font-black text-white">{{ count($data['users']) }}</span>
+                            <span class="text-3xl font-black text-white"><?php echo e(count($data['users'])); ?></span>
                             <span class="text-xs font-semibold text-violet-200">petugas</span>
                         </div>
                         <p class="text-xs font-semibold text-violet-200">Terdaftar aktif</p>
@@ -484,13 +494,13 @@
                 </div>
             </div>
 
-            {{-- Titik Patrol - Emerald/Teal --}}
+            
             <div class="stat-card-colorful rounded-2xl p-5 shadow-xl" style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);">
                 <p class="text-xs font-bold uppercase tracking-wider text-emerald-100 mb-3">Titik Patrol</p>
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="flex items-baseline gap-2 mb-1">
-                            <span class="text-3xl font-black text-white">{{ count($data['locations']) }}</span>
+                            <span class="text-3xl font-black text-white"><?php echo e(count($data['locations'])); ?></span>
                             <span class="text-xs font-semibold text-emerald-200">lokasi</span>
                         </div>
                         <p class="text-xs font-semibold text-emerald-200">Wajib patrol</p>
@@ -504,14 +514,14 @@
                 </div>
             </div>
 
-            {{-- Kelengkapan - Rose/Orange --}}
+            
             <div class="stat-card-colorful rounded-2xl p-5 shadow-xl" style="background: linear-gradient(135deg, #f43f5e 0%, #fb923c 100%);">
                 <p class="text-xs font-bold uppercase tracking-wider text-rose-100 mb-3">Rata-rata Kelengkapan</p>
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
                         <div class="flex items-baseline gap-2 mb-2">
                             <span class="text-3xl font-black text-white">
-                                @php
+                                <?php
                                     $avgCompletion = 0;
                                     if (count($data['users']) > 0) {
                                         $totalCompletion = 0;
@@ -522,12 +532,12 @@
                                         }
                                         $avgCompletion = round($totalCompletion / count($data['users']));
                                     }
-                                @endphp
-                                {{ $avgCompletion }}%
+                                ?>
+                                <?php echo e($avgCompletion); ?>%
                             </span>
                         </div>
                         <div class="w-full h-2 bg-white/25 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-white/70" style="width: {{ $avgCompletion }}%; transition: width 0.8s ease;"></div>
+                            <div class="h-full rounded-full bg-white/70" style="width: <?php echo e($avgCompletion); ?>%; transition: width 0.8s ease;"></div>
                         </div>
                     </div>
                     <div class="stat-icon flex h-12 w-12 items-center justify-center rounded-xl shadow-md ml-3">
@@ -539,17 +549,13 @@
             </div>
         </div>
 
-        {{-- ── PIC Progress Summary Table ──────────────────────────────── --}}
-        @php
+        
+        <?php
             $picSummary = [];
-            // Hanya include users yang ada di $picColors (users dengan data)
             foreach ($data['users'] as $user) {
-                if (!isset($picColors[$user->name])) {
-                    continue; // Skip users tanpa data
-                }
                 $picSummary[$user->id] = [
                     'name' => $user->name,
-                    'color_idx' => $picColors[$user->name],
+                    'color_idx' => $picColors[$user->name] ?? 0,
                     'total_locations' => count($data['locations']),
                     'locations_visited' => 0,
                     'total_shifts' => count($data['shifts']),
@@ -560,9 +566,6 @@
             }
 
             foreach ($data['users'] as $user) {
-                if (!isset($picColors[$user->name])) {
-                    continue; // Skip users tanpa data
-                }
                 $locationsVisited = \App\Models\Patrol::where('user_id', $user->id)
                     ->whereBetween('patrol_time', [
                         \Carbon\Carbon::create($data['year'], $data['month'], 1),
@@ -594,10 +597,10 @@
                 $picSummary[$user->id]['patrols_pending'] = $patrolsPending;
                 $picSummary[$user->id]['patrols_total'] = $patrolsTotal;
             }
-        @endphp
+        ?>
 
         <div class="overflow-hidden rounded-2xl shadow-xl border-0" style="background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #fff1f8 100%);">
-            {{-- Colorful Table Header --}}
+            
             <div class="section-header-gradient px-6 py-4 border-b border-indigo-100 dark:border-indigo-900/30">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
@@ -630,8 +633,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-indigo-50 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                        @foreach($picSummary as $userId => $pic)
-                            @php
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $picSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $userId => $pic): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $colorKey = $badgeKeys[$pic['color_idx'] % count($badgeKeys)];
                                 $cs = $badgeBg[$colorKey];
                                 $progressPercent = $pic['total_locations'] > 0
@@ -651,60 +654,61 @@
                                 $statusGradient = $overallPercent >= 80
                                     ? 'from-emerald-500 to-teal-500'
                                     : ($overallPercent >= 50 ? 'from-amber-400 to-orange-500' : 'from-rose-500 to-pink-500');
-                            @endphp
+                            ?>
                             <tr class="colorful-row transition-colors duration-200 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/10">
-                                {{-- Nama --}}
+                                
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-11 w-11 items-center justify-center rounded-xl {{ $avatarSolid[$colorKey] }} text-black text-sm font-black shadow-lg">
-                                            {{ $initials }}
+                                        <div class="flex h-11 w-11 items-center justify-center rounded-xl <?php echo e($avatarSolid[$colorKey]); ?> text-black text-sm font-black shadow-lg">
+                                            <?php echo e($initials); ?>
+
                                         </div>
                                         <div>
-                                            <div class="font-bold text-gray-900 dark:text-white">{{ $pic['name'] }}</div>
-                                            <div class="text-xs font-semibold {{ $cs['text'] }}">Petugas Patrol</div>
+                                            <div class="font-bold text-gray-900 dark:text-white"><?php echo e($pic['name']); ?></div>
+                                            <div class="text-xs font-semibold <?php echo e($cs['text']); ?>">Petugas Patrol</div>
                                         </div>
                                     </div>
                                 </td>
 
-                                {{-- Lokasi --}}
+                                
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="text-xl font-black {{ $cs['text'] }}">{{ $pic['locations_visited'] }}</div>
-                                    <div class="text-xs font-semibold text-gray-400">dari {{ $pic['total_locations'] }}</div>
+                                    <div class="text-xl font-black <?php echo e($cs['text']); ?>"><?php echo e($pic['locations_visited']); ?></div>
+                                    <div class="text-xs font-semibold text-gray-400">dari <?php echo e($pic['total_locations']); ?></div>
                                 </td>
 
-                                {{-- Selesai --}}
+                                
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="text-xl font-black text-emerald-600 dark:text-emerald-400">{{ $pic['patrols_completed'] }}</div>
-                                    <div class="text-xs font-semibold text-gray-400">dari {{ $pic['patrols_total'] }}</div>
+                                    <div class="text-xl font-black text-emerald-600 dark:text-emerald-400"><?php echo e($pic['patrols_completed']); ?></div>
+                                    <div class="text-xs font-semibold text-gray-400">dari <?php echo e($pic['patrols_total']); ?></div>
                                 </td>
 
-                                {{-- Tertunda --}}
+                                
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="text-xl font-black text-amber-600 dark:text-amber-400">{{ $pic['patrols_pending'] }}</div>
+                                    <div class="text-xl font-black text-amber-600 dark:text-amber-400"><?php echo e($pic['patrols_pending']); ?></div>
                                     <div class="text-xs font-semibold text-gray-400">belum selesai</div>
                                 </td>
 
-                                {{-- Progres bar --}}
+                                
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="w-36">
                                         <div class="flex items-center justify-between mb-1.5">
-                                            <span class="text-xs font-bold {{ $cs['text'] }}">{{ $progressPercent }}%</span>
+                                            <span class="text-xs font-bold <?php echo e($cs['text']); ?>"><?php echo e($progressPercent); ?>%</span>
                                         </div>
                                         <div class="w-full h-2.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden shadow-inner">
-                                            <div class="h-full rounded-full bg-gradient-to-r {{ $cs['gradient'] }}" style="width: {{ $progressPercent }}%; transition: width 0.9s cubic-bezier(0.65, 0, 0.35, 1);"></div>
+                                            <div class="h-full rounded-full bg-gradient-to-r <?php echo e($cs['gradient']); ?>" style="width: <?php echo e($progressPercent); ?>%; transition: width 0.9s cubic-bezier(0.65, 0, 0.35, 1);"></div>
                                         </div>
                                     </div>
                                 </td>
 
-                                {{-- Kelengkapan badge --}}
+                                
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-black text-white shadow-md bg-gradient-to-r {{ $statusGradient }}">
-                                        <span>{{ $statusIcon }}</span>
-                                        <span>{{ $overallPercent }}%</span>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-black text-white shadow-md bg-gradient-to-r <?php echo e($statusGradient); ?>">
+                                        <span><?php echo e($statusIcon); ?></span>
+                                        <span><?php echo e($overallPercent); ?>%</span>
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                     <tfoot>
                         <tr style="background: linear-gradient(90deg, #eef2ff 0%, #f5f3ff 50%, #fdf2f8 100%);">
@@ -725,7 +729,7 @@
                                         </div>
                                     </div>
                                     <div class="font-bold text-indigo-600 dark:text-indigo-400">
-                                        Total: {{ count($picSummary) }} Petugas
+                                        Total: <?php echo e(count($picSummary)); ?> Petugas
                                     </div>
                                 </div>
                             </td>
@@ -735,8 +739,8 @@
             </div>
         </div>
 
-        {{-- ── Location Performance ─────────────────────────────────────── --}}
-        @php
+        
+        <?php
             $locationPerformance = [];
             $totalUsers = count($data['users']);
 
@@ -810,7 +814,7 @@
                 'text-amber-700', 'text-indigo-700', 'text-teal-700', 'text-fuchsia-700',
                 'text-sky-700', 'text-orange-700', 'text-cyan-700', 'text-pink-700',
             ];
-        @endphp
+        ?>
 
         <div class="overflow-hidden rounded-2xl shadow-xl border border-indigo-100 dark:border-indigo-900/30">
             <div class="section-header-gradient px-6 py-4 border-b border-indigo-100 dark:border-indigo-900/30">
@@ -830,69 +834,70 @@
 
             <div class="p-5" style="background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #fff1f8 100%);">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @foreach($locationPerformance as $locIndex => $location)
-                        @php
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $locationPerformance; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $locIndex => $location): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $lci = $locIndex % count($locGradients);
                             $locGrad = $locGradients[$lci];
                             $locBg   = $locBgGradients[$lci];
                             $locBdr  = $locBorderColors[$lci];
                             $locTxt  = $locTextColors[$lci];
                             $remaining = $location['total_users'] - $location['users_patrolled'];
-                        @endphp
+                        ?>
 
-                        <div class="loc-card group relative flex flex-col rounded-xl border {{ $locBdr }} bg-gradient-to-br {{ $locBg }} dark:bg-gray-800/60 dark:border-gray-700/50 p-4 shadow-md">
-                            {{-- Rank badge --}}
+                        <div class="loc-card group relative flex flex-col rounded-xl border <?php echo e($locBdr); ?> bg-gradient-to-br <?php echo e($locBg); ?> dark:bg-gray-800/60 dark:border-gray-700/50 p-4 shadow-md">
+                            
                             <div class="absolute top-3 right-3">
-                                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-black text-white shadow-md bg-gradient-to-br {{ $locGrad }}">
-                                    {{ $locIndex + 1 }}
+                                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-black text-white shadow-md bg-gradient-to-br <?php echo e($locGrad); ?>">
+                                    <?php echo e($locIndex + 1); ?>
+
                                 </span>
                             </div>
 
-                            {{-- Title --}}
+                            
                             <div class="mb-3 pr-8">
-                                <h4 class="font-black text-gray-900 dark:text-white text-sm group-hover:{{ $locTxt }} transition-colors">{{ $location['name'] }}</h4>
-                                <p class="text-[10px] font-bold {{ $locTxt }} uppercase tracking-wider mt-0.5">
-                                    {{ $location['users_patrolled'] }}/{{ $location['total_users'] }} PIC
+                                <h4 class="font-black text-gray-900 dark:text-white text-sm group-hover:<?php echo e($locTxt); ?> transition-colors"><?php echo e($location['name']); ?></h4>
+                                <p class="text-[10px] font-bold <?php echo e($locTxt); ?> uppercase tracking-wider mt-0.5">
+                                    <?php echo e($location['users_patrolled']); ?>/<?php echo e($location['total_users']); ?> PIC
                                 </p>
                             </div>
 
-                            {{-- Percent --}}
+                            
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-2xl font-black bg-gradient-to-r {{ $locGrad }} bg-clip-text text-transparent">
-                                    {{ $location['performance_percent'] }}%
+                                <span class="text-2xl font-black bg-gradient-to-r <?php echo e($locGrad); ?> bg-clip-text text-transparent">
+                                    <?php echo e($location['performance_percent']); ?>%
                                 </span>
                             </div>
 
-                            {{-- Progress --}}
+                            
                             <div class="relative w-full h-3 rounded-full bg-white/70 dark:bg-gray-700/50 overflow-hidden mb-4 shadow-inner border border-white/80">
-                                <div class="h-full rounded-full bg-gradient-to-r {{ $locGrad }} shadow"
-                                     style="width: {{ $location['performance_percent'] }}%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div class="h-full rounded-full bg-gradient-to-r <?php echo e($locGrad); ?> shadow"
+                                     style="width: <?php echo e($location['performance_percent']); ?>%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);">
                                 </div>
                             </div>
 
-                            {{-- Stats --}}
+                            
                             <div class="grid grid-cols-3 gap-2">
                                 <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 p-2 shadow-sm border border-white/60 text-center">
-                                    <p class="text-sm font-black {{ $locTxt }}">{{ $location['users_patrolled'] }}</p>
+                                    <p class="text-sm font-black <?php echo e($locTxt); ?>"><?php echo e($location['users_patrolled']); ?></p>
                                     <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Aktif</p>
                                 </div>
                                 <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 p-2 shadow-sm border border-white/60 text-center">
-                                    <p class="text-sm font-black {{ $locTxt }}">{{ $location['total_patrols'] }}</p>
+                                    <p class="text-sm font-black <?php echo e($locTxt); ?>"><?php echo e($location['total_patrols']); ?></p>
                                     <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Patrol</p>
                                 </div>
                                 <div class="rounded-lg bg-white/80 dark:bg-gray-800/70 p-2 shadow-sm border border-white/60 text-center">
-                                    <p class="text-sm font-black {{ $remaining > 0 ? 'text-rose-600' : 'text-emerald-600' }}">{{ $remaining }}</p>
+                                    <p class="text-sm font-black <?php echo e($remaining > 0 ? 'text-rose-600' : 'text-emerald-600'); ?>"><?php echo e($remaining); ?></p>
                                     <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Sisa</p>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>
 
-        {{-- ── PIC Color Legend ────────────────────────────────────────── --}}
-        @if(count($picColors) > 0)
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($picColors) > 0): ?>
         <div class="overflow-hidden rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-xl">
             <div class="section-header-gradient px-5 py-3 border-b border-indigo-100 dark:border-indigo-900/30">
                 <div class="flex items-center gap-2">
@@ -903,43 +908,45 @@
                     </div>
                     <h3 class="text-sm font-black text-gray-700 dark:text-gray-300">Daftar Petugas</h3>
                     <span class="text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
-                        {{ count($picColors) }} petugas
+                        <?php echo e(count($picColors)); ?> petugas
                     </span>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2.5 p-4" style="background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #fff1f8 100%);">
-                @foreach($picColors as $picName => $colorIdx)
-                    @php
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $picColors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $picName => $colorIdx): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $colorKey = $badgeKeys[$colorIdx % count($badgeKeys)];
                         $cs       = $badgeBg[$colorKey];
                         $initials = collect(explode(' ', $picName))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
-                    @endphp
-                    <div class="pic-badge flex items-center gap-2.5 rounded-xl border {{ $cs['border'] }} {{ $cs['bg'] }} pl-2 pr-4 py-1.5 shadow-md transition-all duration-200">
-                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg {{ $avatarSolid[$colorKey] }} text-black text-[11px] font-black shadow-md">
-                            {{ $initials }}
+                    ?>
+                    <div class="pic-badge flex items-center gap-2.5 rounded-xl border <?php echo e($cs['border']); ?> <?php echo e($cs['bg']); ?> pl-2 pr-4 py-1.5 shadow-md transition-all duration-200">
+                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg <?php echo e($avatarSolid[$colorKey]); ?> text-black text-[11px] font-black shadow-md">
+                            <?php echo e($initials); ?>
+
                         </span>
-                        <span class="text-xs font-bold {{ $cs['text'] }}">{{ $picName }}</span>
+                        <span class="text-xs font-bold <?php echo e($cs['text']); ?>"><?php echo e($picName); ?></span>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-        {{-- ── Calendar Grid ───────────────────────────────────────────── --}}
+        
         <div class="overflow-hidden rounded-2xl shadow-xl border border-indigo-100 dark:border-indigo-800/30">
 
-            {{-- Calendar header --}}
+            
             <div class="calendar-header-bg flex flex-col gap-3 border-b border-indigo-100 dark:border-indigo-900/30 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
-                        <span class="text-xl font-black text-white">{{ $data['month'] }}</span>
+                        <span class="text-xl font-black text-white"><?php echo e($data['month']); ?></span>
                     </div>
                     <div>
                         <h3 class="text-lg font-black text-gray-900 dark:text-white tracking-tight">
-                            {{ $monthNameId[$data['month']] }} {{ $data['year'] }}
+                            <?php echo e($monthNameId[$data['month']]); ?> <?php echo e($data['year']); ?>
+
                         </h3>
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                            {{ $data['days_in_month'] }} hari &bull; {{ count($calendarData) }} hari aktif
+                            <?php echo e($data['days_in_month']); ?> hari &bull; <?php echo e(count($calendarData)); ?> hari aktif
                         </p>
                     </div>
                 </div>
@@ -959,9 +966,9 @@
                 </div>
             </div>
 
-            {{-- Day name headers - colorful! --}}
+            
             <div class="grid grid-cols-7 border-b border-indigo-100 dark:border-gray-700">
-                @php
+                <?php
                     $dayHeaderColors = [
                         'text-rose-500 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400',    // Min
                         'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',    // Sen
@@ -971,23 +978,23 @@
                         'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400', // Jum
                         'text-rose-500 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400',    // Sab
                     ];
-                @endphp
-                @foreach($dayNames as $i => $dn)
-                    <div class="py-3 text-center {{ $dayHeaderColors[$i] }}">
-                        <span class="text-xs font-black uppercase tracking-widest">{{ $dn }}</span>
+                ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $dayNames; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $dn): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="py-3 text-center <?php echo e($dayHeaderColors[$i]); ?>">
+                        <span class="text-xs font-black uppercase tracking-widest"><?php echo e($dn); ?></span>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
 
-            {{-- Day cells --}}
+            
             <div class="grid grid-cols-7 bg-white dark:bg-gray-800">
-                {{-- Leading blanks --}}
-                @for($b = 0; $b < $startBlank; $b++)
+                
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($b = 0; $b < $startBlank; $b++): ?>
                     <div class="min-h-[110px] border-b border-r border-indigo-50 dark:border-gray-700/30 bg-gradient-to-br from-gray-50/60 to-gray-100/30 dark:from-gray-800/60 dark:to-gray-800/20"></div>
-                @endfor
+                <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                @for($day = 1; $day <= $data['days_in_month']; $day++)
-                    @php
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($day = 1; $day <= $data['days_in_month']; $day++): ?>
+                    <?php
                         $cellDate   = \Carbon\Carbon::create($data['year'], $data['month'], $day);
                         $isWeekend  = in_array($cellDate->dayOfWeek, [0, 6]);
                         $isToday    = $cellDate->isToday();
@@ -999,96 +1006,99 @@
                         $dayMissed  = array_sum(array_column($dayPics, 'missed_count'));
                         $hasData    = count($dayPics) > 0;
                         $healthStatus = $hasData ? ($dayMissed === 0 ? 'success' : ($dayPatrol === 0 ? 'danger' : 'warning')) : 'none';
-                    @endphp
+                    ?>
 
                     <div
-                        onclick="selectDay({{ $day }})"
-                        id="cal-day-{{ $day }}"
-                        data-day="{{ $day }}"
+                        onclick="selectDay(<?php echo e($day); ?>)"
+                        id="cal-day-<?php echo e($day); ?>"
+                        data-day="<?php echo e($day); ?>"
                         tabindex="0"
                         role="button"
-                        aria-label="Tanggal {{ $day }} {{ $monthNameId[$data['month']] }}, {{ $dayPatrol }} patrol selesai"
+                        aria-label="Tanggal <?php echo e($day); ?> <?php echo e($monthNameId[$data['month']]); ?>, <?php echo e($dayPatrol); ?> patrol selesai"
                         class="cal-cell group min-h-[110px] border-b border-r border-indigo-50 dark:border-gray-700/30 p-3 cursor-pointer select-none focus:outline-none
-                            {{ $isWeekend ? 'weekend-cell' : 'bg-white dark:bg-gray-800' }}">
+                            <?php echo e($isWeekend ? 'weekend-cell' : 'bg-white dark:bg-gray-800'); ?>">
 
-                        {{-- Date header --}}
+                        
                         <div class="mb-2 flex items-center justify-between">
                             <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black transition-all duration-200
-                                {{ $isToday
+                                <?php echo e($isToday
                                     ? 'today-badge text-white'
                                     : ($isWeekend
                                         ? 'text-rose-400 dark:text-rose-400 group-hover:bg-rose-50 dark:group-hover:bg-rose-900/20'
-                                        : 'text-gray-700 dark:text-gray-300 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20') }}">
-                                {{ $day }}
+                                        : 'text-gray-700 dark:text-gray-300 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20')); ?>">
+                                <?php echo e($day); ?>
+
                             </span>
-                            {{-- Health dot --}}
-                            @if($hasData)
+                            
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasData): ?>
                                 <div class="relative flex items-center">
                                     <span class="inline-flex h-2.5 w-2.5 rounded-full
-                                        {{ $healthStatus === 'success' ? 'bg-emerald-500 shadow-emerald-500/60' : ($healthStatus === 'danger' ? 'bg-rose-500 shadow-rose-500/60' : 'bg-amber-400 shadow-amber-500/60') }}
-                                        shadow-md {{ $healthStatus === 'danger' ? 'animate-pulse' : '' }}">
+                                        <?php echo e($healthStatus === 'success' ? 'bg-emerald-500 shadow-emerald-500/60' : ($healthStatus === 'danger' ? 'bg-rose-500 shadow-rose-500/60' : 'bg-amber-400 shadow-amber-500/60')); ?>
+
+                                        shadow-md <?php echo e($healthStatus === 'danger' ? 'animate-pulse' : ''); ?>">
                                     </span>
-                                    @if($healthStatus === 'danger')
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($healthStatus === 'danger'): ?>
                                         <span class="absolute inset-0 inline-flex h-2.5 w-2.5 rounded-full bg-rose-400 opacity-60 animate-ping"></span>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
-                        {{-- PIC Badges --}}
+                        
                         <div class="space-y-1.5">
-                            @foreach($showPics as $picName => $picData)
-                                @php
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $showPics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $picName => $picData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $colorKey   = $badgeKeys[$picData['color_index'] % count($badgeKeys)];
                                     $cs         = $badgeBg[$colorKey];
                                     $shortName  = \Str::limit($picName, 9, '..');
                                     $hasMissed  = $picData['missed_count'] > 0;
                                     $percentage = $picData['total_assigned'] > 0 ? round(($picData['patrol_count'] / $picData['total_assigned']) * 100) : 0;
-                                @endphp
-                                <div class="flex items-center justify-between gap-1 rounded-lg border {{ $cs['border'] }} {{ $cs['bg'] }} px-2 py-1.5 transition-all duration-150 hover:shadow-sm hover:-translate-y-px">
+                                ?>
+                                <div class="flex items-center justify-between gap-1 rounded-lg border <?php echo e($cs['border']); ?> <?php echo e($cs['bg']); ?> px-2 py-1.5 transition-all duration-150 hover:shadow-sm hover:-translate-y-px">
                                     <div class="flex items-center gap-1.5 min-w-0">
-                                        <span class="h-2 w-2 rounded-full flex-shrink-0 {{ $cs['dot'] }} shadow-sm {{ $hasMissed ? 'ring-2 ring-rose-400/60' : '' }}"></span>
-                                        <span class="text-[10px] font-bold truncate {{ $cs['text'] }}">{{ $shortName }}</span>
+                                        <span class="h-2 w-2 rounded-full flex-shrink-0 <?php echo e($cs['dot']); ?> shadow-sm <?php echo e($hasMissed ? 'ring-2 ring-rose-400/60' : ''); ?>"></span>
+                                        <span class="text-[10px] font-bold truncate <?php echo e($cs['text']); ?>"><?php echo e($shortName); ?></span>
                                     </div>
                                     <div class="flex items-center gap-1">
-                                        <span class="text-[10px] font-black {{ $cs['text'] }} flex-shrink-0 px-1 py-0.5 rounded bg-white/60 dark:bg-gray-800/60">
-                                            {{ $picData['patrol_count'] }}
+                                        <span class="text-[10px] font-black <?php echo e($cs['text']); ?> flex-shrink-0 px-1 py-0.5 rounded bg-white/60 dark:bg-gray-800/60">
+                                            <?php echo e($picData['patrol_count']); ?>
+
                                         </span>
-                                        @if($percentage < 100)
-                                            <span class="text-[9px] font-semibold text-gray-400 dark:text-gray-500">{{ $percentage }}%</span>
-                                        @endif
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($percentage < 100): ?>
+                                            <span class="text-[9px] font-semibold text-gray-400 dark:text-gray-500"><?php echo e($percentage); ?>%</span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                            @if($extraCount > 0)
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($extraCount > 0): ?>
                                 <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
                                     <svg class="h-3 w-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                     </svg>
-                                    <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">+{{ $extraCount }} lainnya</span>
+                                    <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">+<?php echo e($extraCount); ?> lainnya</span>
                                 </div>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
-                @endfor
+                <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                {{-- Trailing blanks --}}
-                @php
+                
+                <?php
                     $totalCells     = $startBlank + $data['days_in_month'];
                     $trailingBlanks = (7 - ($totalCells % 7)) % 7;
-                @endphp
-                @for($t = 0; $t < $trailingBlanks; $t++)
+                ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($t = 0; $t < $trailingBlanks; $t++): ?>
                     <div class="min-h-[110px] border-b border-r border-indigo-50 dark:border-gray-700/30 bg-gradient-to-br from-gray-50/60 to-gray-100/30 dark:from-gray-800/60 dark:to-gray-800/20"></div>
-                @endfor
+                <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
 
-        {{-- ── Detail Panel ─────────────────────────────────────────────── --}}
+        
         <div id="cal-detail-panel"
             class="hidden overflow-hidden rounded-2xl shadow-2xl border border-indigo-200 dark:border-indigo-800/50">
 
-            {{-- Panel header --}}
+            
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);" class="px-5 py-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex items-center gap-3">
@@ -1126,18 +1136,18 @@
                 </div>
             </div>
 
-            {{-- Panel body --}}
+            
             <div id="cal-detail-body" class="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3 custom-scroll max-h-[500px] overflow-y-auto" style="background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #fff1f8 100%);"></div>
         </div>
 
     </div>
 
-    {{-- ── Scripts ───────────────────────────────────────────────────────── --}}
-    @push('scripts')
+    
+    <?php $__env->startPush('scripts'); ?>
     <script>
-        const calendarData = @json($calendarData);
-        const colorPalette = @json($badgeKeys);
-        const monthYear    = { month: {{ $data['month'] }}, year: {{ $data['year'] }} };
+        const calendarData = <?php echo json_encode($calendarData, 15, 512) ?>;
+        const colorPalette = <?php echo json_encode($badgeKeys, 15, 512) ?>;
+        const monthYear    = { month: <?php echo e($data['month']); ?>, year: <?php echo e($data['year']); ?> };
 
         const dayNamesFull  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
         const monthNamesId  = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -1346,7 +1356,7 @@
             if (selectedDay !== null && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
                 e.preventDefault();
                 let newDay = selectedDay + (e.key === 'ArrowRight' ? 1 : -1);
-                if (newDay >= 1 && newDay <= {{ $data['days_in_month'] }}) selectDay(newDay);
+                if (newDay >= 1 && newDay <= <?php echo e($data['days_in_month']); ?>) selectDay(newDay);
             }
         });
 
@@ -1359,6 +1369,15 @@
             }
         });
     </script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-</x-filament-panels::page>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $attributes = $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $component = $__componentOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?><?php /**PATH /root/gawe/PatrolHR/resources/views/filament/admin/pages/dashboard.blade.php ENDPATH**/ ?>
