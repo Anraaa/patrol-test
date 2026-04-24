@@ -69,23 +69,6 @@ Route::get('/admin/patrols/scan/{uuid}', function (string $uuid) {
         ]);
     }
 
-    // Cek apakah petugas sudah mengisi laporan patroli hari ini
-    $patrol = \App\Models\Patrol::where('user_id', auth()->id())
-        ->whereDate('patrol_time', today())
-        ->latest('patrol_time')
-        ->first();
-
-    if (! $patrol) {
-        return view('checkpoint-result', [
-            'success'     => false,
-            'icon'        => '🚫',
-            'title'       => 'Belum Ada Laporan Patroli',
-            'message'     => 'Anda harus mengisi laporan patroli terlebih dahulu sebelum scan checkpoint.',
-            'actionUrl'   => url('/admin/patrols/create'),
-            'actionLabel' => '📋 Buat Laporan Sekarang',
-        ]);
-    }
-
     // Arahkan ke GPS verify, dengan successUrl ke form checkpoint
     $successUrl = url('/admin/patrols/checkpoint/' . $uuid);
     return view('geo-verify', compact('uuid', 'successUrl'));
