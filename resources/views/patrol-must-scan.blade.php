@@ -314,9 +314,9 @@
             </div>
 
             <div class="actions">
-                <button onclick="startQrScan()" class="btn btn-primary">
+                <a href="{{ route('patrol.camera-scan') }}" class="btn btn-primary">
                     📱 MULAI SCAN QR CODE
-                </button>
+                </a>
                 <a href="{{ route('filament.admin.pages.dashboard') }}" class="btn btn-secondary">
                     ← Kembali ke Dashboard
                 </a>
@@ -324,36 +324,5 @@
         </div>
     </div>
 
-    <script>
-        function startQrScan() {
-            // Show instruction or open camera for scanning
-            // For now, show an alert or redirect to a scan interface
-            const qrUrl = prompt(
-                '📱 Masukkan URL QR Code atau scan dengan kamera\n\nContoh:\nhttps://yourapp.local/scan-qr/550e8400-e29b-41d4-a716-446655440000',
-                ''
-            );
-
-            if (qrUrl && qrUrl.trim()) {
-                // Extract UUID from URL
-                const uuidMatch = qrUrl.match(/([0-9a-f\-]{36})$/i);
-                if (uuidMatch) {
-                    const uuid = uuidMatch[1];
-                    window.location.href = `/scan-qr/${uuid}`;
-                } else if (qrUrl.includes('/scan-qr/')) {
-                    window.location.href = qrUrl;
-                } else {
-                    alert('❌ Format URL tidak valid. Harap cek kembali.');
-                }
-            }
-        }
-
-        // Optional: Auto-detect if browser supports camera
-        window.addEventListener('load', function() {
-            // Check if device has camera capability
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                console.log('📷 Perangkat mendukung kamera');
-            }
-        });
-    </script>
 </body>
 </html>

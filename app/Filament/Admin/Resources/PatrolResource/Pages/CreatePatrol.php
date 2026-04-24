@@ -97,14 +97,14 @@ class CreatePatrol extends CreateRecord
 
         // MUST SCAN: User harus scan QR terlebih dahulu sebelum membuat laporan
         if (!$requestLocUuid) {
-            $this->redirect(route('patrol.qr-must-scan'));
+            $this->redirect(route('patrol.camera-scan'));
             return;
         }
 
         // Verify location exists
         $location = Location::where('uuid', $requestLocUuid)->first();
         if (!$location) {
-            $this->redirect(route('patrol.qr-must-scan'));
+            $this->redirect(route('patrol.camera-scan'));
             return;
         }
 

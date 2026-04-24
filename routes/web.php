@@ -23,6 +23,16 @@ Route::middleware(['auth'])->prefix('api/qr')->group(function () {
     Route::post('/validate/{token}', [\App\Http\Controllers\PatrolQrController::class, 'validateQrScan']);
 });
 
+// Custom camera scan page
+Route::get('/patrol/camera-scan', [\App\Http\Controllers\PatrolQrController::class, 'showCameraScan'])
+    ->middleware('auth')
+    ->name('patrol.camera-scan');
+
+// Camera scan submission
+Route::post('/patrol/camera-scan/submit', [\App\Http\Controllers\PatrolQrController::class, 'submitCameraScan'])
+    ->middleware('auth')
+    ->name('patrol.qr-scan-submit');
+
 // Public QR code scan — scan location QR code first before creating patrol report
 // User harus scan QR lokasi terlebih dahulu sebelum bisa membuat laporan patrol
 Route::get('/scan-qr/{uuid}', [\App\Http\Controllers\PatrolQrController::class, 'publicScan'])

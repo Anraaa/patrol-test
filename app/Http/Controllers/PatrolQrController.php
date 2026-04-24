@@ -115,4 +115,61 @@ class PatrolQrController extends Controller
             'redirectUrl' => route('filament.admin.resources.patrols.create', ['loc' => $uuid]),
         ]);
     }
+
+    /**
+     * Handle custom camera scan submission
+     * User scan QR code dari custom camera page
+     */
+    public function submitCameraScan(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda harus login terlebih dahulu',
+            ], 401);
+        }
+
+        $uuid = $request->input('uuid');
+
+        if (!$uuid) {
+            return response()->json([
+                'success' => false,
+                'message' => 'UUID lokasi tidak ditemukan',
+            ], 400);
+        }
+
+        // Validate location exists
+        $location = Location::where('uuid', $uuid)->first();
+
+        if (!$location) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lokasi dengan QR code ini tidak ditemukan dalam sistem',
+            ], 404);
+        }
+
+        // ✅ SET SESSION
+        session()->put('qr_location_scanned', $uuid);
+        session()->put('qr_location_scanned_at', now()->timestamp);
+
+        // Return redirect URL
+        return response()->json([
+            'success' => true,
+            'message' => "Lokasi {$location->name} berhasil di-validasi",
+            'redirect_url' => route('filament.admin.resources.patrols.create', ['loc' => $uuid]),
+        ]);
+    }
+
+    /**
+     * Show custom camera scan page
+     */
+    public function showCameraScan()
+    {
+        if (!auth()->check()) {
+            session()->put('url.intended', route('patrol.camera-scan'));
+            return redirect()->route('filament.admin.auth.login');
+        }
+
+        return view('qr-camera-scan');
+    }
 }
