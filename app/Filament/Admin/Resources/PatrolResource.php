@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Forms\Components\SignaturePad;
+use App\Forms\Components\PhotoCaptureField;
 use App\Filament\Admin\Resources\PatrolResource\Pages;
 use App\Models\Patrol;
 use App\Models\Employee;
@@ -237,16 +238,9 @@ class PatrolResource extends Resource
                                         ->prefixIcon('heroicon-m-hand-raised')
                                         ->columnSpanFull(),
 
-                                    Forms\Components\FileUpload::make('photos')
+                                    PhotoCaptureField::make('photos')
                                         ->label('Foto Temuan')
-                                        ->helperText('Upload foto bukti pelanggaran (maks 5 foto)')
-                                        ->multiple()
-                                        ->image()
-                                        ->imageEditor()
-                                        ->directory('patrol-photos')
                                         ->maxFiles(5)
-                                        ->openable()
-                                        ->downloadable()
                                         ->columnSpanFull(),
                                 ])->compact(),
                         ]),
