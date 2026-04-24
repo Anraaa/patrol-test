@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan QR Code Lokasi</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -75,9 +75,30 @@
             overflow: hidden;
             margin-bottom: 1.5rem;
             aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+
+        #qr-reader {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+        }
+
+        /* Hide the default UI injected by html5-qrcode (file upload, camera select) */
+        #qr-reader__header_message,
+        #qr-reader__filescan_input,
+        #qr-reader__dashboard_section_swaplink,
+        #qr-reader__camera_selection {
+            display: none !important;
+        }
+
+        #qr-reader__dashboard {
+            display: none !important;
+        }
+
+        #qr-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
 
         .scanner-overlay {
@@ -357,7 +378,7 @@
             <div class="content">
                 <!-- Scanner Container -->
                 <div class="scanner-container" id="scannerContainer">
-                    <div id="video"></div>
+                    <div id="qr-reader"></div>
                     <div class="scanner-overlay">
                         <div class="scanner-corner bottom-left"></div>
                         <div class="scanner-corner bottom-right"></div>
@@ -418,7 +439,6 @@
         const submitBtn = document.getElementById('submitBtn');
         const permissionsError = document.getElementById('permissionsError');
         const scannerContainer = document.getElementById('scannerContainer');
-        const video = document.getElementById('video');
 
         let detectedQRCode = null;
         let html5QrcodeScanner = null;
@@ -426,34 +446,25 @@
         // Start QR code scanning
         async function startScanning() {
             try {
-                console.log('📱 Initializing html5-qrcode scanner...');
-                
-                // Create scanner instance
-                html5QrcodeScanner = new Html5Qrcode('video', {
-                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-                    verbose: false,
-                    useBarCodeDetectorIfAvailable: true,
-                });
+                if (typeof Html5Qrcode === 'undefined') {
+                    throw new Error('Library Html5Qrcode tidak berhasil dimuat. Periksa koneksi internet Anda.');
+                }
 
-                const config = {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0,
-                    disableFlip: false
-                };
+                // Create scanner instance — no options object to avoid compatibility issues
+                html5QrcodeScanner = new Html5Qrcode('qr-reader');
 
-                // Start scanning
+                const config = { fps: 10, qrbox: 250 };
+
                 await html5QrcodeScanner.start(
                     { facingMode: 'environment' },
                     config,
                     onScanSuccess,
                     onScanError
                 );
-                
-                console.log('✅ Camera access granted and scanner started');
+
                 statusIcon.textContent = '🔍';
-                statusText.textContent = 'Menjalankan scanner...';
-                
+                statusText.textContent = 'Scanner aktif — arahkan ke QR code';
+
             } catch (error) {
                 console.error('❌ Error initializing scanner:', error);
                 handlePermissionError(error);
