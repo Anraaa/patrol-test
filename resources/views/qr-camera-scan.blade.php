@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan QR Code Lokasi</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -78,16 +78,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        #video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #canvas {
-            display: none;
         }
 
         .scanner-overlay {
@@ -367,8 +357,7 @@
             <div class="content">
                 <!-- Scanner Container -->
                 <div class="scanner-container" id="scannerContainer">
-                    <video id="video" autoplay playsinline></video>
-                    <canvas id="canvas"></canvas>
+                    <div id="video"></div>
                     <div class="scanner-overlay">
                         <div class="scanner-corner bottom-left"></div>
                         <div class="scanner-corner bottom-right"></div>
@@ -422,8 +411,6 @@
     </div>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
         const statusText = document.getElementById('statusText');
         const statusIcon = document.getElementById('statusIcon');
         const resultBox = document.getElementById('resultBox');
@@ -431,81 +418,64 @@
         const submitBtn = document.getElementById('submitBtn');
         const permissionsError = document.getElementById('permissionsError');
         const scannerContainer = document.getElementById('scannerContainer');
+        const video = document.getElementById('video');
 
         let detectedQRCode = null;
-        let isProcessing = false;
-        let scanCount = 0;
+        let html5QrcodeScanner = null;
 
-        // Start camera access
+        // Start QR code scanning
         async function startScanning() {
             try {
-                console.log('📱 Starting camera access...');
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                console.log('📱 Initializing html5-qrcode scanner...');
+                
+                // Create scanner instance
+                html5QrcodeScanner = new Html5Qrcode('video', {
+                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                    verbose: false,
+                    useBarCodeDetectorIfAvailable: true,
                 });
-                console.log('✅ Camera access granted');
-                video.srcObject = stream;
-                video.addEventListener('loadedmetadata', () => {
-                    console.log('📺 Video metadata loaded, starting QR scan');
-                    scanQRCode();
-                });
+
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    disableFlip: false
+                };
+
+                // Start scanning
+                await html5QrcodeScanner.start(
+                    { facingMode: 'environment' },
+                    config,
+                    onScanSuccess,
+                    onScanError
+                );
+                
+                console.log('✅ Camera access granted and scanner started');
+                statusIcon.textContent = '🔍';
+                statusText.textContent = 'Menjalankan scanner...';
+                
             } catch (error) {
-                console.error('❌ Camera error:', error);
+                console.error('❌ Error initializing scanner:', error);
                 handlePermissionError(error);
             }
         }
 
-        function handlePermissionError(error) {
-            console.error('Camera error:', error);
-            scannerContainer.classList.add('hidden');
-            document.getElementById('actions').classList.add('hidden');
-            permissionsError.classList.remove('hidden');
-
-            statusText.textContent = 'Akses kamera ditolak: ' + error.message;
-            statusIcon.textContent = '❌';
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log('✅ QR Code detected:', decodedText);
+            
+            if (detectedQRCode && detectedQRCode === decodedText) {
+                return; // Already processed this QR code
+            }
+            
+            detectedQRCode = decodedText;
+            handleQRCodeDetected(decodedText);
         }
 
-        function scanQRCode() {
-            const ctx = canvas.getContext('2d');
-            
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                
-                // Check if jsQR is loaded
-                if (typeof jsQR === 'undefined') {
-                    console.error('❌ jsQR library not loaded!');
-                    statusText.textContent = 'Error: jsQR library not loaded';
-                    statusIcon.textContent = '⚠️';
-                    return;
-                }
-                
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: 2
-                });
-
-                if (code && code.data) {
-                    if (!detectedQRCode || detectedQRCode !== code.data) {
-                        console.log('🔍 QR Code detected:', code.data);
-                        handleQRCodeDetected(code.data);
-                    }
-                } else {
-                    scanCount++;
-                    if (scanCount % 60 === 0) {
-                        // Log every 60 frames (~2 seconds at 30fps)
-                        console.log('🔄 Scanning... No QR detected yet');
-                    }
-                }
-            }
-
-            requestAnimationFrame(scanQRCode);
+        function onScanError(errorMessage) {
+            // Ignore scanning errors, just keep trying
         }
 
         function handleQRCodeDetected(qrData) {
-            detectedQRCode = qrData;
             console.log('✅ QR Data received:', qrData);
 
             // Extract UUID from URL if it's a full URL
@@ -537,6 +507,16 @@
 
             // Store UUID for submission
             window.detectedUUID = uuid;
+        }
+
+        function handlePermissionError(error) {
+            console.error('Camera error:', error);
+            scannerContainer.classList.add('hidden');
+            document.getElementById('actions').classList.add('hidden');
+            permissionsError.classList.remove('hidden');
+
+            statusText.textContent = 'Akses kamera ditolak: ' + error.message;
+            statusIcon.textContent = '❌';
         }
 
         function submitQRCode() {
@@ -592,21 +572,10 @@
 
         // Stop camera when page unloads
         window.addEventListener('beforeunload', () => {
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(err => console.log('Error stopping scanner:', err));
             }
         });
-
-        // Check if jsQR library is available
-        setTimeout(() => {
-            if (typeof jsQR === 'undefined') {
-                console.error('❌ jsQR library failed to load from CDN!');
-                statusText.textContent = 'Error: jsQR library tidak ter-load';
-                statusIcon.textContent = '⚠️';
-            } else {
-                console.log('✅ jsQR library loaded successfully');
-            }
-        }, 2000);
     </script>
 </body>
 </html>
