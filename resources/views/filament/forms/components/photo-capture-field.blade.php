@@ -1,9 +1,7 @@
 @php
-    $state = $getState();
-    $statePaths = $getStatePath(false);
+    $statePaths = $getStatePath();
     $isDisabled = $isDisabled();
-    $files = array_values((array) $state);
-    $uuid = $getComponent()->getContainer()->getParentComponent()?->getName() ?? 'default';
+    $files = (array) $getState();
 @endphp
 
 <x-dynamic-component
@@ -16,7 +14,7 @@
             {{-- Camera Button --}}
             <button
                 type="button"
-                x-on:click="document.getElementById('camera-{{ $uuid }}').click()"
+                onclick="document.getElementById('camera-input').click()"
                 :disabled="{{ $isDisabled ? 'true' : 'false' }}"
                 class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -29,7 +27,7 @@
             {{-- Gallery Button --}}
             <button
                 type="button"
-                x-on:click="document.getElementById('gallery-{{ $uuid }}').click()"
+                onclick="document.getElementById('gallery-input').click()"
                 :disabled="{{ $isDisabled ? 'true' : 'false' }}"
                 class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -41,7 +39,7 @@
 
         {{-- Hidden File Inputs --}}
         <input
-            id="camera-{{ $uuid }}"
+            id="camera-input"
             type="file"
             accept="image/*"
             capture="environment"
@@ -50,7 +48,7 @@
             class="hidden">
 
         <input
-            id="gallery-{{ $uuid }}"
+            id="gallery-input"
             type="file"
             accept="image/*"
             multiple
@@ -59,7 +57,7 @@
             class="hidden">
 
         {{-- File Previews --}}
-        @if ($files)
+        @if (count($files) > 0)
         <div class="space-y-2">
             <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Foto yang dipilih ({{ count($files) }}/5)
@@ -67,21 +65,28 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 @foreach ($files as $index => $file)
                 <div class="relative group">
-                    @if (is_string($file) && (str_starts_with($file, 'http') || str_starts_with($file, '/')))
-                    <img
-                        src="{{ is_string($file) ? (str_starts_with($file, 'http') ? $file : \Storage::url($file)) : $file->getTemporaryUrl() }}"
-                        alt="Photo {{ $index + 1 }}"
-                        class="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                    @if (is_string($file))
+                        @if (str_starts_with($file, 'http') || str_starts_with($file, '/'))
+                        <img
+                            src="{{ str_starts_with($file, 'http') ? $file : \Storage::url($file) }}"
+                            alt="Photo {{ $index + 1 }}"
+                            class="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                        @else
+                        <div class="w-full h-24 bg-gray-200 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center">
+                            <span class="text-xs text-gray-500">{{ $file }}</span>
+                        </div>
+                        @endif
                     @else
-                    <div class="w-full h-24 bg-gray-200 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <div class="w-full h-24 bg-blue-100 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm flex items-center justify-center">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-6-6.5h.008v.008h-.008v-.008Zm0 6h.008v.008h-.008v-.008Zm6-11.25h.008v.008h-.008v-.008Zm0 6h.008v.008h-.008v-.008Z" />
                         </svg>
                     </div>
                     @endif
                     <button
                         type="button"
-                        x-on:click="$wire.$call('deleteUploadedFile', '{{ $statePaths }}', {{ $index }})"
+                        wire:click="$parent.$parent.deleteUploadedFile('{{ $statePaths }}', {{ $index }})"
+                        onclick="Livewire.dispatch('deleteUploadedFile', { statePath: '{{ $statePaths }}', index: {{ $index }} })"
                         class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         {{ $isDisabled ? 'disabled' : '' }}>
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -101,4 +106,5 @@
     </div>
 
 </x-dynamic-component>
+
 
