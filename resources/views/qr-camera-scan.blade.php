@@ -434,18 +434,23 @@
 
         let detectedQRCode = null;
         let isProcessing = false;
+        let scanCount = 0;
 
         // Start camera access
         async function startScanning() {
             try {
+                console.log('📱 Starting camera access...');
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'environment' }
                 });
+                console.log('✅ Camera access granted');
                 video.srcObject = stream;
                 video.addEventListener('loadedmetadata', () => {
+                    console.log('📺 Video metadata loaded, starting QR scan');
                     scanQRCode();
                 });
             } catch (error) {
+                console.error('❌ Camera error:', error);
                 handlePermissionError(error);
             }
         }
@@ -456,7 +461,7 @@
             document.getElementById('actions').classList.add('hidden');
             permissionsError.classList.remove('hidden');
 
-            statusText.textContent = 'Akses kamera ditolak';
+            statusText.textContent = 'Akses kamera ditolak: ' + error.message;
             statusIcon.textContent = '❌';
         }
 
@@ -469,18 +474,29 @@
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Check if jsQR is loaded
+                if (typeof jsQR === 'undefined') {
+                    console.error('❌ jsQR library not loaded!');
+                    statusText.textContent = 'Error: jsQR library not loaded';
+                    statusIcon.textContent = '⚠️';
+                    return;
+                }
+                
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
                     inversionAttempts: 2
                 });
 
                 if (code && code.data) {
                     if (!detectedQRCode || detectedQRCode !== code.data) {
+                        console.log('🔍 QR Code detected:', code.data);
                         handleQRCodeDetected(code.data);
                     }
                 } else {
-                    if (detectedQRCode) {
-                        // Clear detection if QR code is no longer visible
-                        // Don't reset immediately to avoid flickering
+                    scanCount++;
+                    if (scanCount % 60 === 0) {
+                        // Log every 60 frames (~2 seconds at 30fps)
+                        console.log('🔄 Scanning... No QR detected yet');
                     }
                 }
             }
@@ -490,17 +506,22 @@
 
         function handleQRCodeDetected(qrData) {
             detectedQRCode = qrData;
+            console.log('✅ QR Data received:', qrData);
 
             // Extract UUID from URL if it's a full URL
             let uuid = qrData;
             
-            // Try to extract UUID from URL
+            // Try to extract UUID from URL - first check if UUID is at the end
             const uuidMatch = qrData.match(/([0-9a-f\-]{36})$/i);
             if (uuidMatch) {
                 uuid = uuidMatch[1];
+                console.log('✅ UUID extracted (regex):', uuid);
             } else if (qrData.includes('/scan-qr/')) {
                 const parts = qrData.split('/');
                 uuid = parts[parts.length - 1];
+                console.log('✅ UUID extracted (path):', uuid);
+            } else {
+                console.warn('⚠️ Could not extract UUID from:', qrData);
             }
 
             // Show result
@@ -524,6 +545,8 @@
                 return;
             }
 
+            console.log('📤 Submitting QR code:', window.detectedUUID);
+
             // Show loading state
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Memproses...';
@@ -539,19 +562,25 @@
                     uuid: window.detectedUUID
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('📥 Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('📥 Response data:', data);
                 if (data.success) {
+                    console.log('✅ QR validation successful, redirecting...');
                     // Redirect to create patrol form
                     window.location.href = data.redirect_url;
                 } else {
+                    console.error('❌ QR validation failed:', data.message);
                     alert('❌ ' + (data.message || 'QR code tidak valid'));
                     submitBtn.disabled = false;
                     submitBtn.textContent = '📋 Buat Laporan Patroli';
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('❌ Fetch error:', error);
                 alert('❌ Terjadi kesalahan: ' + error.message);
                 submitBtn.disabled = false;
                 submitBtn.textContent = '📋 Buat Laporan Patroli';
@@ -567,6 +596,17 @@
                 video.srcObject.getTracks().forEach(track => track.stop());
             }
         });
+
+        // Check if jsQR library is available
+        setTimeout(() => {
+            if (typeof jsQR === 'undefined') {
+                console.error('❌ jsQR library failed to load from CDN!');
+                statusText.textContent = 'Error: jsQR library tidak ter-load';
+                statusIcon.textContent = '⚠️';
+            } else {
+                console.log('✅ jsQR library loaded successfully');
+            }
+        }, 2000);
     </script>
 </body>
 </html>

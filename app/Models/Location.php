@@ -51,7 +51,7 @@ class Location extends Model
 
     public function getQrContentAttribute(): string
     {
-        return url("/admin/patrols/scan/{$this->uuid}");
+        return url("/scan-qr/{$this->uuid}");
     }
 
     public function patrols(): HasMany
