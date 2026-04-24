@@ -67,4 +67,47 @@ class PatrolQrController extends Controller
             'message' => 'Gagal memvalidasi patrol. Token tidak sesuai.',
         ], 400);
     }
+
+    /**
+     * Public QR scan endpoint: validate QR, check auth, redirect to form
+     * Flow: Scan QR → Validate → Redirect to login or patrol form
+     */
+    public function publicScan(string $token)
+    {
+        // Validate QR token exists
+        $patrol = Patrol::where('qr_code_token', $token)
+            ->with(['user', 'location', 'shift'])
+            ->first();
+
+        if (!$patrol) {
+            return view('qr-scan-result', [
+                'success' => false,
+                'icon' => '❌',
+                'title' => 'QR Code Tidak Valid',
+                'message' => 'Token QR code tidak ditemukan atau tidak valid.',
+            ]);
+        }
+
+        // Check if QR already validated
+        if ($patrol->isValidated()) {
+            return view('qr-scan-result', [
+                'success' => false,
+                'icon' => '⚠️',
+                'title' => 'QR Code Sudah Dipindai',
+                'message' => "Patrol sudah ter-validasi pada {$patrol->qr_scanned_at->format('d/m/Y H:i')}",
+            ]);
+        }
+
+        // If not authenticated → redirect to login
+        if (!auth()->check()) {
+            session()->put('url.intended', route('patrol.qr-scan', ['token' => $token]));
+            return redirect()->route('filament.admin.auth.login');
+        }
+
+        // If authenticated → redirect to patrol form with QR token
+        // Store token in session to pass to form
+        session()->put('qr_scan_token', $token);
+        
+        return redirect()->route('filament.admin.resources.patrols.create');
+    }
 }
