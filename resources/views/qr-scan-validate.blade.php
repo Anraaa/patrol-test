@@ -401,8 +401,7 @@
                 const data = await response.json();
 
                 if (data.valid) {
-                    redirectUrl = data.redirect_url;
-                    showValidState(data);
+                    window.location.href = data.redirect_url;
                 } else {
                     showInvalidState(data);
                 }
