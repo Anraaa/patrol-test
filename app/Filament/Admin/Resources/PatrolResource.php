@@ -246,11 +246,9 @@ class PatrolResource extends Resource
                         ]),
 
                     Forms\Components\Wizard\Step::make('Checkpoint & Absensi')
-                        ->icon('heroicon-o-qr-code')
-                        ->description('Scan QR lokasi, foto muka, dan tanda tangan')
+                        ->icon('heroicon-o-camera')
+                        ->description('Foto muka dan tanda tangan petugas')
                         ->schema([
-                            Forms\Components\Hidden::make('checkpoint_location_id'),
-                            Forms\Components\Hidden::make('checkpoint_uuid'),
                             Forms\Components\Hidden::make('checkpoint_face_photo_b64'),
                             Forms\Components\Hidden::make('checkpoint_signature'),
 

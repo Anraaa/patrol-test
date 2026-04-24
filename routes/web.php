@@ -103,17 +103,6 @@ Route::get('/admin/patrols/checkpoint/{uuid}', function (string $uuid) {
         ->latest('patrol_time')
         ->first();
 
-    if (! $patrol) {
-        return view('checkpoint-result', [
-            'success'     => false,
-            'icon'        => '🚫',
-            'title'       => 'Patroli Tidak Ditemukan',
-            'message'     => 'Tidak ada laporan patroli hari ini.',
-            'actionUrl'   => url('/admin/patrols/create'),
-            'actionLabel' => '📋 Buat Laporan',
-        ]);
-    }
-
     return view('checkpoint-form', compact('uuid', 'location', 'patrol'));
 })->middleware('auth');
 
