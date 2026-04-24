@@ -74,9 +74,11 @@ class CreatePatrol extends CreateRecord
             return;
         }
 
-        $uuid = request()->query('loc');
+        $requestLocUuid = request()->query('loc');
+        $scannedLocationUuid = session('qr_location_scanned');
 
-        if ($uuid && Location::where('uuid', $uuid)->exists()) {
+        // If accessing with ?loc param, verify location exists
+        if ($requestLocUuid && Location::where('uuid', $requestLocUuid)->exists()) {
             abort_unless(auth()->check(), 403);
             $this->viaScan = true;
             return;
@@ -89,43 +91,47 @@ class CreatePatrol extends CreateRecord
     {
         parent::mount();
 
-        $uuid = request()->query('loc');
+        // Check if user has scanned a location
+        $scannedLocationUuid = session('qr_location_scanned');
+        $requestLocUuid = request()->query('loc') ?? $scannedLocationUuid;
 
-        if ($uuid) {
-            $location = Location::where('uuid', $uuid)->first();
-
-            if ($location) {
-                if ($location->latitude !== null && $location->longitude !== null) {
-                    $tokenKey   = 'geo_verified_' . $uuid;
-                    $verifiedAt = session($tokenKey);
-                    $expiry     = now()->subMinutes(5)->timestamp;
-
-                    if (! $verifiedAt || $verifiedAt < $expiry) {
-                        session()->forget($tokenKey);
-                        $this->redirect('/admin/patrols/scan/' . urlencode($uuid));
-                        return;
-                    }
-
-                    session()->forget($tokenKey);
-                }
-
-                $this->scannedLocationId = $location->id;
-
-                $this->form->fill(['location_id' => $location->id]);
-
-                Notification::make()
-                    ->title('Lokasi Terdeteksi dari QR Code')
-                    ->body("📍 {$location->name} — Lokasi sudah terisi otomatis.")
-                    ->success()
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('QR Code Tidak Valid')
-                    ->body('Lokasi dengan kode QR tersebut tidak ditemukan.')
-                    ->danger()
-                    ->send();
-            }
+        // MUST SCAN: User harus scan QR terlebih dahulu sebelum membuat laporan
+        if (!$requestLocUuid) {
+            $this->redirect(route('patrol.qr-must-scan'));
+            return;
         }
+
+        // Verify location exists
+        $location = Location::where('uuid', $requestLocUuid)->first();
+        if (!$location) {
+            $this->redirect(route('patrol.qr-must-scan'));
+            return;
+        }
+
+        // Auto-fill lokasi
+        if ($location->latitude !== null && $location->longitude !== null) {
+            $tokenKey   = 'geo_verified_' . $requestLocUuid;
+            $verifiedAt = session($tokenKey);
+            $expiry     = now()->subMinutes(5)->timestamp;
+
+            if (! $verifiedAt || $verifiedAt < $expiry) {
+                session()->forget($tokenKey);
+                $this->redirect('/admin/patrols/scan/' . urlencode($requestLocUuid));
+                return;
+            }
+
+            session()->forget($tokenKey);
+        }
+
+        $this->scannedLocationId = $location->id;
+
+        $this->form->fill(['location_id' => $location->id]);
+
+        Notification::make()
+            ->title('Lokasi Terdeteksi dari QR Code')
+            ->body("📍 {$location->name} — Lokasi sudah terisi otomatis.")
+            ->success()
+            ->send();
     }
 
     protected function getFormActions(): array

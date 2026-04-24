@@ -71,7 +71,7 @@ class PatrolQrController extends Controller
 
     /**
      * Public QR scan endpoint: scan location QR code
-     * Flow: Scan QR Lokasi → Validate Location → Check Auth → Redirect to Patrol Form
+     * Flow: Scan QR Lokasi → Validate Location → Check Auth → Set Session → Redirect to Patrol Form
      * 
      * User harus scan QR lokasi terlebih dahulu sebelum bisa membuat laporan patrol
      */
@@ -89,13 +89,30 @@ class PatrolQrController extends Controller
             ]);
         }
 
-        // If not authenticated → redirect to login
+        // If not authenticated → redirect to login, store intended URL
         if (!auth()->check()) {
             session()->put('url.intended', route('patrol.qr-scan', ['uuid' => $uuid]));
             return redirect()->route('filament.admin.auth.login');
         }
 
-        // If authenticated → redirect to patrol form with location pre-filled
-        return redirect()->route('filament.admin.resources.patrols.create', ['loc' => $uuid]);
+        // ✅ Mark that user has scanned a location
+        // Store scanned location UUID in session
+        session()->put('qr_location_scanned', $uuid);
+        session()->put('qr_location_scanned_at', now()->timestamp);
+
+        // Show success message
+        return view('qr-scan-result', [
+            'success' => true,
+            'icon' => '✅',
+            'title' => 'QR Lokasi Valid!',
+            'message' => "Lokasi {$location->name} berhasil di-validasi. Anda sekarang bisa membuat laporan patroli.",
+            'locationData' => [
+                'name' => $location->name,
+                'latitude' => $location->latitude,
+                'longitude' => $location->longitude,
+                'radius_meters' => $location->radius_meters,
+            ],
+            'redirectUrl' => route('filament.admin.resources.patrols.create', ['loc' => $uuid]),
+        ]);
     }
 }

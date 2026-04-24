@@ -165,7 +165,7 @@
                 @endif
             </div>
             <div class="actions">
-                <a href="{{ $redirectUrl ?? route('filament.admin.pages.dashboard') }}" class="btn btn-primary">← Kembali</a>
+                <a href="{{ $redirectUrl ?? route('filament.admin.pages.dashboard') }}" class="btn btn-primary">📋 Buat Laporan Patroli</a>
             </div>
         @else
             <div class="badge {{ isset($icon) && strpos($icon, '⚠️') !== false ? 'badge-warning' : 'badge-danger' }}">

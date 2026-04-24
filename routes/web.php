@@ -28,6 +28,15 @@ Route::middleware(['auth'])->prefix('api/qr')->group(function () {
 Route::get('/scan-qr/{uuid}', [\App\Http\Controllers\PatrolQrController::class, 'publicScan'])
     ->name('patrol.qr-scan');
 
+// Mandatory scan page — user must scan QR before creating patrol
+Route::get('/patrol/must-scan', function () {
+    if (!auth()->check()) {
+        return redirect()->route('filament.admin.auth.login');
+    }
+    
+    return view('patrol-must-scan');
+})->middleware('auth')->name('patrol.qr-must-scan');
+
 // QR Code scan — checkpoint mode: petugas isi form dulu, lalu scan QR di setiap pos
 Route::get('/admin/patrols/scan/{uuid}', function (string $uuid) {
     if (! auth()->check()) {
