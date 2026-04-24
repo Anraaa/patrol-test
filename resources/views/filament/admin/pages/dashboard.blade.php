@@ -1054,7 +1054,7 @@
                                     $hasMissed  = $picData['missed_count'] > 0;
                                     $percentage = $picData['total_assigned'] > 0 ? round(($picData['patrol_count'] / $picData['total_assigned']) * 100) : 0;
                                 @endphp
-                                <div class="flex items-center justify-between gap-1 rounded-lg border {{ $cs['border'] }} {{ $cs['bg'] }} px-2 py-1.5 transition-all duration-150 hover:shadow-sm hover:-translate-y-px">
+                                <div data-pic-name="{{ $picName }}" class="flex items-center justify-between gap-1 rounded-lg border {{ $cs['border'] }} {{ $cs['bg'] }} px-2 py-1.5 transition-all duration-150 hover:shadow-sm hover:-translate-y-px">
                                     <div class="flex items-center gap-1.5 min-w-0">
                                         <span class="h-2 w-2 rounded-full flex-shrink-0 {{ $cs['dot'] }} shadow-sm {{ $hasMissed ? 'ring-2 ring-rose-400/60' : '' }}"></span>
                                         <span class="text-[10px] font-bold truncate {{ $cs['text'] }}">{{ $shortName }}</span>
@@ -1071,7 +1071,7 @@
                             @endforeach
 
                             @if($extraCount > 0)
-                                <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
+                                <div class="extra-count-badge flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
                                     <svg class="h-3 w-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                     </svg>
@@ -1186,7 +1186,12 @@
                 badge.style.cursor = 'pointer';
                 badge.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const picName = this.textContent.trim().split('\n')[1].trim();
+                    
+                    // Extract nama dari span yang memiliki class font-bold
+                    const nameSpan = this.querySelector('span.font-bold');
+                    const picName = nameSpan ? nameSpan.textContent.trim() : '';
+                    
+                    if (!picName) return;
                     
                     // Toggle filter
                     if (filteredUser === picName) {
@@ -1208,32 +1213,121 @@
             });
         });
 
-        function updateCalendarFilter() {
-            const calendarCells = document.querySelectorAll('.cal-cell');
-            calendarCells.forEach(cell => {
-                if (!filteredUser) {
-                    // Tampil semua
-                    cell.style.opacity = '1';
-                    cell.style.pointerEvents = 'auto';
-                } else {
-                    // Check apakah cell ini berisi petugas yang di-filter
-                    const hasFilteredUser = Array.from(cell.querySelectorAll('.pic-badge')).some(badge => 
-                        badge.textContent.includes(filteredUser)
-                    );
-                    
-                    if (hasFilteredUser) {
-                        cell.style.opacity = '1';
-                        cell.style.pointerEvents = 'auto';
-                    } else {
-                        cell.style.opacity = '0.3';
-                        cell.style.pointerEvents = 'none';
-                    }
-                }
+function updateCalendarFilter() {
+    const calendarCells = document.querySelectorAll('.cal-cell');
+
+    calendarCells.forEach(cell => {
+        const dayNum = parseInt(cell.getAttribute('data-day'));
+        const dayData = calendarData[dayNum] || {};
+
+        if (!filteredUser) {
+            // Reset semua ke kondisi awal — reload page untuk restore DOM
+            cell.style.opacity = '1';
+            cell.style.pointerEvents = 'auto';
+
+            // Hapus badge dinamis yang pernah di-inject
+            cell.querySelectorAll('.dynamic-injected-badge').forEach(el => el.remove());
+
+            // Restore badge asli
+            cell.querySelectorAll('[data-pic-name]').forEach(badge => {
+                badge.style.display = '';
             });
-            
-            // Update filter info dan reset button
-            updateFilterUI();
+            cell.querySelectorAll('.extra-count-badge').forEach(el => {
+                el.style.display = '';
+            });
+        } else {
+            const hasFilteredUser = Object.prototype.hasOwnProperty.call(dayData, filteredUser);
+
+            if (hasFilteredUser) {
+                cell.style.opacity = '1';
+                cell.style.pointerEvents = 'auto';
+
+                // Sembunyikan badge asli yang bukan target
+                cell.querySelectorAll('[data-pic-name]').forEach(badge => {
+                    const picName = badge.getAttribute('data-pic-name');
+                    badge.style.display = (picName === filteredUser) ? '' : 'none';
+                });
+
+                // Sembunyikan "+X lainnya"
+                cell.querySelectorAll('.extra-count-badge').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Cek apakah badge target sudah ada di DOM
+                const existingBadge = cell.querySelector(`[data-pic-name="${CSS.escape(filteredUser)}"]`);
+                const alreadyInjected = cell.querySelector('.dynamic-injected-badge');
+
+                if (!existingBadge && !alreadyInjected) {
+                    // User ada di calendarData tapi tidak ada di DOM (ter-slice)
+                    // Inject badge dinamis
+                    const picData = dayData[filteredUser];
+                    const colorKey = colorPalette[picData.color_index % colorPalette.length];
+
+                    const colorMap = {
+                        sky:     { bg: 'bg-sky-100',     text: 'text-sky-700',     dot: 'bg-sky-500',     border: 'border-sky-300' },
+                        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500', border: 'border-emerald-300' },
+                        violet:  { bg: 'bg-violet-100',  text: 'text-violet-700',  dot: 'bg-violet-500',  border: 'border-violet-300' },
+                        amber:   { bg: 'bg-amber-100',   text: 'text-amber-700',   dot: 'bg-amber-500',   border: 'border-amber-300' },
+                        rose:    { bg: 'bg-rose-100',    text: 'text-rose-700',    dot: 'bg-rose-500',    border: 'border-rose-300' },
+                        teal:    { bg: 'bg-teal-100',    text: 'text-teal-700',    dot: 'bg-teal-500',    border: 'border-teal-300' },
+                        indigo:  { bg: 'bg-indigo-100',  text: 'text-indigo-700',  dot: 'bg-indigo-500',  border: 'border-indigo-300' },
+                        orange:  { bg: 'bg-orange-100',  text: 'text-orange-700',  dot: 'bg-orange-500',  border: 'border-orange-300' },
+                    };
+
+                    const cs = colorMap[colorKey] || colorMap['indigo'];
+                    const hasMissed = picData.missed_count > 0;
+                    const percentage = picData.total_assigned > 0
+                        ? Math.round((picData.patrol_count / picData.total_assigned) * 100)
+                        : 0;
+                    const shortName = filteredUser.length > 9
+                        ? filteredUser.substring(0, 9) + '..'
+                        : filteredUser;
+
+                    // Cari container badges (div.space-y-1.5)
+                    let badgeContainer = cell.querySelector('.space-y-1\\.5');
+                    if (!badgeContainer) {
+                        // Buat container jika belum ada (hari tanpa data sama sekali tidak akan masuk sini)
+                        badgeContainer = document.createElement('div');
+                        badgeContainer.className = 'space-y-1.5';
+                        cell.appendChild(badgeContainer);
+                    }
+
+                    const badgeEl = document.createElement('div');
+                    badgeEl.setAttribute('data-pic-name', filteredUser);
+                    badgeEl.className = `dynamic-injected-badge flex items-center justify-between gap-1 rounded-lg border ${cs.border} ${cs.bg} px-2 py-1.5 transition-all duration-150`;
+                    badgeEl.innerHTML = `
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="h-2 w-2 rounded-full flex-shrink-0 ${cs.dot} shadow-sm ${hasMissed ? 'ring-2 ring-rose-400/60' : ''}"></span>
+                            <span class="text-[10px] font-bold truncate ${cs.text}">${escapeHtml(shortName)}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[10px] font-black ${cs.text} flex-shrink-0 px-1 py-0.5 rounded bg-white/60">
+                                ${picData.patrol_count}
+                            </span>
+                            ${percentage < 100 ? `<span class="text-[9px] font-semibold text-gray-400">${percentage}%</span>` : ''}
+                        </div>
+                    `;
+                    badgeContainer.appendChild(badgeEl);
+                }
+
+            } else {
+                // Hari ini tidak ada data dari petugas yang di-filter
+                cell.style.opacity = '0.3';
+                cell.style.pointerEvents = 'none';
+                cell.querySelectorAll('[data-pic-name]').forEach(badge => {
+                    badge.style.display = 'none';
+                });
+                cell.querySelectorAll('.extra-count-badge').forEach(el => {
+                    el.style.display = 'none';
+                });
+                // Hapus badge dinamis yang pernah di-inject jika ada
+                cell.querySelectorAll('.dynamic-injected-badge').forEach(el => el.remove());
+            }
         }
+    });
+
+    updateFilterUI();
+}
 
         function updateFilterUI() {
             const filterInfo = document.getElementById('filter-info');

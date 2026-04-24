@@ -907,16 +907,24 @@
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($picColors) > 0): ?>
         <div class="overflow-hidden rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-xl">
             <div class="section-header-gradient px-5 py-3 border-b border-indigo-100 dark:border-indigo-900/30">
-                <div class="flex items-center gap-2">
-                    <div class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm" style="background: linear-gradient(135deg, #f43f5e, #fb923c);">
-                        <svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                        </svg>
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm" style="background: linear-gradient(135deg, #f43f5e, #fb923c);">
+                            <svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-black text-gray-700 dark:text-gray-300">Daftar Petugas</h3>
+                        <span class="text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
+                            <?php echo e(count($picColors)); ?> petugas
+                        </span>
+                        <span id="filter-info" class="hidden text-xs font-semibold bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">
+                            📌 Filter aktif
+                        </span>
                     </div>
-                    <h3 class="text-sm font-black text-gray-700 dark:text-gray-300">Daftar Petugas</h3>
-                    <span class="text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
-                        <?php echo e(count($picColors)); ?> petugas
-                    </span>
+                    <button id="reset-filter-btn" onclick="resetFilter()" class="hidden px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                        ✕ Reset Filter
+                    </button>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2.5 p-4" style="background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #fff1f8 100%);">
@@ -926,7 +934,7 @@
                         $cs       = $badgeBg[$colorKey];
                         $initials = collect(explode(' ', $picName))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
                     ?>
-                    <div class="pic-badge flex items-center gap-2.5 rounded-xl border <?php echo e($cs['border']); ?> <?php echo e($cs['bg']); ?> pl-2 pr-4 py-1.5 shadow-md transition-all duration-200">
+                    <div class="pic-badge flex items-center gap-2.5 rounded-xl border <?php echo e($cs['border']); ?> <?php echo e($cs['bg']); ?> pl-2 pr-4 py-1.5 shadow-md transition-all duration-200 hover:shadow-lg hover:scale-105">
                         <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg <?php echo e($avatarSolid[$colorKey]); ?> text-black text-[11px] font-black shadow-md">
                             <?php echo e($initials); ?>
 
@@ -1052,6 +1060,7 @@
                         </div>
 
                         
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasData): ?>
                         <div class="space-y-1.5">
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $showPics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $picName => $picData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php
@@ -1061,7 +1070,7 @@
                                     $hasMissed  = $picData['missed_count'] > 0;
                                     $percentage = $picData['total_assigned'] > 0 ? round(($picData['patrol_count'] / $picData['total_assigned']) * 100) : 0;
                                 ?>
-                                <div class="flex items-center justify-between gap-1 rounded-lg border <?php echo e($cs['border']); ?> <?php echo e($cs['bg']); ?> px-2 py-1.5 transition-all duration-150 hover:shadow-sm hover:-translate-y-px">
+                                <div data-pic-name="<?php echo e($picName); ?>" class="flex items-center justify-between gap-1 rounded-lg border <?php echo e($cs['border']); ?> <?php echo e($cs['bg']); ?> px-2 py-1.5 transition-all duration-150 hover:shadow-sm hover:-translate-y-px">
                                     <div class="flex items-center gap-1.5 min-w-0">
                                         <span class="h-2 w-2 rounded-full flex-shrink-0 <?php echo e($cs['dot']); ?> shadow-sm <?php echo e($hasMissed ? 'ring-2 ring-rose-400/60' : ''); ?>"></span>
                                         <span class="text-[10px] font-bold truncate <?php echo e($cs['text']); ?>"><?php echo e($shortName); ?></span>
@@ -1079,7 +1088,7 @@
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($extraCount > 0): ?>
-                                <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
+                                <div class="extra-count-badge flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
                                     <svg class="h-3 w-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                     </svg>
@@ -1087,6 +1096,7 @@
                                 </div>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
@@ -1183,6 +1193,180 @@
 
         let selectedDay = null;
         let isAnimating = false;
+        let filteredUser = null; // Track petugas yang di-filter
+
+        // Setup event listeners untuk pic-badge
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFilterUI(); // Initialize filter UI
+            const badges = document.querySelectorAll('.pic-badge');
+            badges.forEach(badge => {
+                badge.style.cursor = 'pointer';
+                badge.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Extract nama dari span yang memiliki class font-bold
+                    const nameSpan = this.querySelector('span.font-bold');
+                    const picName = nameSpan ? nameSpan.textContent.trim() : '';
+                    
+                    if (!picName) return;
+                    
+                    // Toggle filter
+                    if (filteredUser === picName) {
+                        filteredUser = null; // Reset ke semua
+                        this.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+                    } else {
+                        // Remove highlight dari yang sebelumnya
+                        document.querySelectorAll('.pic-badge').forEach(b => {
+                            b.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+                        });
+                        
+                        filteredUser = picName;
+                        this.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+                    }
+                    
+                    // Update calendar display
+                    updateCalendarFilter();
+                });
+            });
+        });
+
+function updateCalendarFilter() {
+    const calendarCells = document.querySelectorAll('.cal-cell');
+
+    calendarCells.forEach(cell => {
+        const dayNum = parseInt(cell.getAttribute('data-day'));
+        const dayData = calendarData[dayNum] || {};
+
+        if (!filteredUser) {
+            // Reset semua ke kondisi awal — reload page untuk restore DOM
+            cell.style.opacity = '1';
+            cell.style.pointerEvents = 'auto';
+
+            // Hapus badge dinamis yang pernah di-inject
+            cell.querySelectorAll('.dynamic-injected-badge').forEach(el => el.remove());
+
+            // Restore badge asli
+            cell.querySelectorAll('[data-pic-name]').forEach(badge => {
+                badge.style.display = '';
+            });
+            cell.querySelectorAll('.extra-count-badge').forEach(el => {
+                el.style.display = '';
+            });
+        } else {
+            const hasFilteredUser = Object.prototype.hasOwnProperty.call(dayData, filteredUser);
+
+            if (hasFilteredUser) {
+                cell.style.opacity = '1';
+                cell.style.pointerEvents = 'auto';
+
+                // Sembunyikan badge asli yang bukan target
+                cell.querySelectorAll('[data-pic-name]').forEach(badge => {
+                    const picName = badge.getAttribute('data-pic-name');
+                    badge.style.display = (picName === filteredUser) ? '' : 'none';
+                });
+
+                // Sembunyikan "+X lainnya"
+                cell.querySelectorAll('.extra-count-badge').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Cek apakah badge target sudah ada di DOM
+                const existingBadge = cell.querySelector(`[data-pic-name="${CSS.escape(filteredUser)}"]`);
+                const alreadyInjected = cell.querySelector('.dynamic-injected-badge');
+
+                if (!existingBadge && !alreadyInjected) {
+                    // User ada di calendarData tapi tidak ada di DOM (ter-slice)
+                    // Inject badge dinamis
+                    const picData = dayData[filteredUser];
+                    const colorKey = colorPalette[picData.color_index % colorPalette.length];
+
+                    const colorMap = {
+                        sky:     { bg: 'bg-sky-100',     text: 'text-sky-700',     dot: 'bg-sky-500',     border: 'border-sky-300' },
+                        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500', border: 'border-emerald-300' },
+                        violet:  { bg: 'bg-violet-100',  text: 'text-violet-700',  dot: 'bg-violet-500',  border: 'border-violet-300' },
+                        amber:   { bg: 'bg-amber-100',   text: 'text-amber-700',   dot: 'bg-amber-500',   border: 'border-amber-300' },
+                        rose:    { bg: 'bg-rose-100',    text: 'text-rose-700',    dot: 'bg-rose-500',    border: 'border-rose-300' },
+                        teal:    { bg: 'bg-teal-100',    text: 'text-teal-700',    dot: 'bg-teal-500',    border: 'border-teal-300' },
+                        indigo:  { bg: 'bg-indigo-100',  text: 'text-indigo-700',  dot: 'bg-indigo-500',  border: 'border-indigo-300' },
+                        orange:  { bg: 'bg-orange-100',  text: 'text-orange-700',  dot: 'bg-orange-500',  border: 'border-orange-300' },
+                    };
+
+                    const cs = colorMap[colorKey] || colorMap['indigo'];
+                    const hasMissed = picData.missed_count > 0;
+                    const percentage = picData.total_assigned > 0
+                        ? Math.round((picData.patrol_count / picData.total_assigned) * 100)
+                        : 0;
+                    const shortName = filteredUser.length > 9
+                        ? filteredUser.substring(0, 9) + '..'
+                        : filteredUser;
+
+                    // Cari container badges (div.space-y-1.5)
+                    let badgeContainer = cell.querySelector('.space-y-1\\.5');
+                    if (!badgeContainer) {
+                        // Buat container jika belum ada (hari tanpa data sama sekali tidak akan masuk sini)
+                        badgeContainer = document.createElement('div');
+                        badgeContainer.className = 'space-y-1.5';
+                        cell.appendChild(badgeContainer);
+                    }
+
+                    const badgeEl = document.createElement('div');
+                    badgeEl.setAttribute('data-pic-name', filteredUser);
+                    badgeEl.className = `dynamic-injected-badge flex items-center justify-between gap-1 rounded-lg border ${cs.border} ${cs.bg} px-2 py-1.5 transition-all duration-150`;
+                    badgeEl.innerHTML = `
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="h-2 w-2 rounded-full flex-shrink-0 ${cs.dot} shadow-sm ${hasMissed ? 'ring-2 ring-rose-400/60' : ''}"></span>
+                            <span class="text-[10px] font-bold truncate ${cs.text}">${escapeHtml(shortName)}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[10px] font-black ${cs.text} flex-shrink-0 px-1 py-0.5 rounded bg-white/60">
+                                ${picData.patrol_count}
+                            </span>
+                            ${percentage < 100 ? `<span class="text-[9px] font-semibold text-gray-400">${percentage}%</span>` : ''}
+                        </div>
+                    `;
+                    badgeContainer.appendChild(badgeEl);
+                }
+
+            } else {
+                // Hari ini tidak ada data dari petugas yang di-filter
+                cell.style.opacity = '0.3';
+                cell.style.pointerEvents = 'none';
+                cell.querySelectorAll('[data-pic-name]').forEach(badge => {
+                    badge.style.display = 'none';
+                });
+                cell.querySelectorAll('.extra-count-badge').forEach(el => {
+                    el.style.display = 'none';
+                });
+                // Hapus badge dinamis yang pernah di-inject jika ada
+                cell.querySelectorAll('.dynamic-injected-badge').forEach(el => el.remove());
+            }
+        }
+    });
+
+    updateFilterUI();
+}
+
+        function updateFilterUI() {
+            const filterInfo = document.getElementById('filter-info');
+            const resetBtn = document.getElementById('reset-filter-btn');
+            
+            if (filteredUser) {
+                filterInfo.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
+            } else {
+                filterInfo.classList.add('hidden');
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        function resetFilter() {
+            filteredUser = null;
+            document.querySelectorAll('.pic-badge').forEach(badge => {
+                badge.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500', 'scale-105');
+            });
+            updateCalendarFilter();
+        }
+
 
         function selectDay(day) {
             if (isAnimating) return;
