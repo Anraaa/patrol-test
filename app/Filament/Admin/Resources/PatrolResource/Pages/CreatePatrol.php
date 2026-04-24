@@ -108,21 +108,6 @@ class CreatePatrol extends CreateRecord
             return;
         }
 
-        // Auto-fill lokasi
-        if ($location->latitude !== null && $location->longitude !== null) {
-            $tokenKey   = 'geo_verified_' . $requestLocUuid;
-            $verifiedAt = session($tokenKey);
-            $expiry     = now()->subMinutes(5)->timestamp;
-
-            if (! $verifiedAt || $verifiedAt < $expiry) {
-                session()->forget($tokenKey);
-                $this->redirect('/admin/patrols/scan/' . urlencode($requestLocUuid));
-                return;
-            }
-
-            session()->forget($tokenKey);
-        }
-
         $this->scannedLocationId = $location->id;
 
         $this->form->fill(['location_id' => $location->id]);
