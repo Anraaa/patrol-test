@@ -599,5 +599,5 @@ Route::get('/admin/patrols/checksheet/export-excel', function () {
 })->middleware('auth');
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin/login');
 });
