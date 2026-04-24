@@ -71,13 +71,12 @@ class PatrolQrController extends Controller
 
     /**
      * Public QR scan endpoint: scan location QR code
-     * Flow: Scan QR Lokasi → Validate Location → Check Auth → Set Session → Redirect to Patrol Form
+     * Flow: Scan QR Lokasi → GPS Validation Page → Validate Distance → Redirect
      * 
-     * User harus scan QR lokasi terlebih dahulu sebelum bisa membuat laporan patrol
+     * Supports both external QR scanner (phone camera) and in-app camera scanner.
      */
     public function publicScan(string $uuid)
     {
-        // Validate location exists by UUID
         $location = Location::where('uuid', $uuid)->first();
 
         if (!$location) {
@@ -89,30 +88,81 @@ class PatrolQrController extends Controller
             ]);
         }
 
-        // If not authenticated → redirect to login, store intended URL
-        if (!auth()->check()) {
-            session()->put('url.intended', route('patrol.qr-scan', ['uuid' => $uuid]));
-            return redirect()->route('filament.admin.auth.login');
+        // Show GPS distance validation page
+        return view('qr-scan-validate', [
+            'location' => $location,
+            'isAuthenticated' => auth()->check(),
+        ]);
+    }
+
+    /**
+     * Validate GPS distance from patrol location.
+     * Called via AJAX from the qr-scan-validate page.
+     * If valid: sets session and returns redirect URL (patrol form or login).
+     */
+    public function validateGpsDistance(\Illuminate\Http\Request $request, string $uuid): JsonResponse
+    {
+        $location = Location::where('uuid', $uuid)->first();
+
+        if (!$location) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Lokasi tidak ditemukan dalam sistem.',
+            ], 404);
         }
 
-        // ✅ Mark that user has scanned a location
-        // Store scanned location UUID in session
-        session()->put('qr_location_scanned', $uuid);
-        session()->put('qr_location_scanned_at', now()->timestamp);
+        $lat = $request->input('latitude');
+        $lng = $request->input('longitude');
 
-        // Show success message
-        return view('qr-scan-result', [
-            'success' => true,
-            'icon' => '✅',
-            'title' => 'QR Lokasi Valid!',
-            'message' => "Lokasi {$location->name} berhasil di-validasi. Anda sekarang bisa membuat laporan patroli.",
-            'locationData' => [
-                'name' => $location->name,
-                'latitude' => $location->latitude,
-                'longitude' => $location->longitude,
-                'radius_meters' => $location->radius_meters,
-            ],
-            'redirectUrl' => route('filament.admin.resources.patrols.create', ['loc' => $uuid]),
+        if ($lat === null || $lng === null) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Koordinat GPS tidak tersedia.',
+            ], 422);
+        }
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+
+        if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Koordinat GPS tidak valid.',
+            ], 422);
+        }
+
+        $distance = $location->distanceTo($lat, $lng);
+        $radius   = $location->radius_meters ?? 100;
+        $isValid  = $distance <= $radius;
+
+        if ($isValid) {
+            // Set session so patrol form knows the user has scanned
+            session()->put('qr_location_scanned', $uuid);
+            session()->put('qr_location_scanned_at', now()->timestamp);
+
+            if (auth()->check()) {
+                $redirectUrl = route('filament.admin.resources.patrols.create', ['loc' => $uuid]);
+            } else {
+                // Store intended URL so after login user lands on patrol form
+                session()->put('url.intended', route('filament.admin.resources.patrols.create', ['loc' => $uuid]));
+                $redirectUrl = route('filament.admin.auth.login');
+            }
+
+            return response()->json([
+                'valid'            => true,
+                'distance'         => (int) round($distance),
+                'radius'           => $radius,
+                'location_name'    => $location->name,
+                'redirect_url'     => $redirectUrl,
+                'is_authenticated' => auth()->check(),
+            ]);
+        }
+
+        return response()->json([
+            'valid'    => false,
+            'distance' => (int) round($distance),
+            'radius'   => $radius,
+            'message'  => 'Anda berada di luar radius lokasi yang diizinkan.',
         ]);
     }
 

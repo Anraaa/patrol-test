@@ -478,23 +478,23 @@
         function handleQRCodeDetected(qrData) {
             console.log('✅ QR Data received:', qrData);
 
-            // Extract UUID from URL if it's a full URL
-            let uuid = qrData;
-            
-            // Try to extract UUID from URL - first check if UUID is at the end
-            const uuidMatch = qrData.match(/([0-9a-f\-]{36})$/i);
-            if (uuidMatch) {
-                uuid = uuidMatch[1];
-                console.log('✅ UUID extracted (regex):', uuid);
-            } else if (qrData.includes('/scan-qr/')) {
-                const parts = qrData.split('/');
-                uuid = parts[parts.length - 1];
-                console.log('✅ UUID extracted (path):', uuid);
-            } else {
-                console.warn('⚠️ Could not extract UUID from:', qrData);
+            // If QR data is a full URL containing /scan-qr/, redirect there directly
+            if (qrData.includes('/scan-qr/')) {
+                console.log('✅ Redirecting to QR URL:', qrData);
+                // Stop camera before redirecting
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.stop().catch(() => {});
+                }
+                window.location.href = qrData;
+                return;
             }
 
-            // Show result
+            // Otherwise treat it as a UUID and build the URL
+            const uuidMatch = qrData.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+            const uuid = uuidMatch ? uuidMatch[1] : qrData;
+            console.log('✅ UUID extracted:', uuid);
+
+            // Show detected result and enable submit
             statusIcon.textContent = '✅';
             statusText.textContent = 'QR Code Terdeteksi!';
             statusText.classList.remove('scanning');
@@ -504,8 +504,6 @@
             resultBox.classList.add('show');
 
             submitBtn.disabled = false;
-
-            // Store UUID for submission
             window.detectedUUID = uuid;
         }
 
@@ -525,46 +523,15 @@
                 return;
             }
 
-            console.log('📤 Submitting QR code:', window.detectedUUID);
-
-            // Show loading state
+            // Redirect to GPS validation page for this location UUID
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Memproses...';
+            submitBtn.textContent = '⏳ Mengalihkan...';
 
-            // Send to server to set session
-            fetch('{{ route("patrol.qr-scan-submit") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    uuid: window.detectedUUID
-                })
-            })
-            .then(response => {
-                console.log('📥 Response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('📥 Response data:', data);
-                if (data.success) {
-                    console.log('✅ QR validation successful, redirecting...');
-                    // Redirect to create patrol form
-                    window.location.href = data.redirect_url;
-                } else {
-                    console.error('❌ QR validation failed:', data.message);
-                    alert('❌ ' + (data.message || 'QR code tidak valid'));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '📋 Buat Laporan Patroli';
-                }
-            })
-            .catch(error => {
-                console.error('❌ Fetch error:', error);
-                alert('❌ Terjadi kesalahan: ' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = '📋 Buat Laporan Patroli';
-            });
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(() => {});
+            }
+
+            window.location.href = '/scan-qr/' + window.detectedUUID;
         }
 
         // Start scanning when page loads

@@ -33,10 +33,14 @@ Route::post('/patrol/camera-scan/submit', [\App\Http\Controllers\PatrolQrControl
     ->middleware('auth')
     ->name('patrol.qr-scan-submit');
 
-// Public QR code scan — scan location QR code first before creating patrol report
-// User harus scan QR lokasi terlebih dahulu sebelum bisa membuat laporan patrol
+// Public QR code scan — shows GPS validation page
+// Works for both external QR scanner (phone camera) and in-app camera scanner
 Route::get('/scan-qr/{uuid}', [\App\Http\Controllers\PatrolQrController::class, 'publicScan'])
     ->name('patrol.qr-scan');
+
+// GPS distance validation AJAX endpoint — called from qr-scan-validate page
+Route::post('/scan-qr/{uuid}/validate-gps', [\App\Http\Controllers\PatrolQrController::class, 'validateGpsDistance'])
+    ->name('patrol.qr-validate-gps');
 
 // Mandatory scan page — user must scan QR before creating patrol
 Route::get('/patrol/must-scan', function () {
