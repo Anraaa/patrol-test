@@ -23,8 +23,9 @@ Route::middleware(['auth'])->prefix('api/qr')->group(function () {
     Route::post('/validate/{token}', [\App\Http\Controllers\PatrolQrController::class, 'validateQrScan']);
 });
 
-// Public QR code scan — first validate QR, then redirect to login or patrol form
-Route::get('/scan-qr/{token}', [\App\Http\Controllers\PatrolQrController::class, 'publicScan'])
+// Public QR code scan — scan location QR code first before creating patrol report
+// User harus scan QR lokasi terlebih dahulu sebelum bisa membuat laporan patrol
+Route::get('/scan-qr/{uuid}', [\App\Http\Controllers\PatrolQrController::class, 'publicScan'])
     ->name('patrol.qr-scan');
 
 // QR Code scan — checkpoint mode: petugas isi form dulu, lalu scan QR di setiap pos

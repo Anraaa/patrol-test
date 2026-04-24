@@ -144,38 +144,36 @@
         @if ($success)
             <div class="badge badge-success">✓ Berhasil</div>
             <div class="icon">✅</div>
-            <h1 class="title">{{ $title ?? 'QR Code Valid' }}</h1>
-            <p class="message">{{ $message ?? 'QR code berhasil divalidasi' }}</p>
+            <h1 class="title">{{ $title ?? 'QR Lokasi Valid' }}</h1>
+            <p class="message">{{ $message ?? 'QR lokasi berhasil divalidasi' }}</p>
             <div class="details show">
-                @if(isset($patrolData))
+                @if(isset($locationData))
                     <div class="detail-item">
-                        <span class="detail-label">Petugas</span>
-                        <span class="detail-value">{{ $patrolData['user_name'] ?? '-' }}</span>
+                        <span class="detail-label">Nama Lokasi</span>
+                        <span class="detail-value">{{ $locationData['name'] ?? '-' }}</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Lokasi</span>
-                        <span class="detail-value">{{ $patrolData['location_name'] ?? '-' }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Shift</span>
-                        <span class="detail-value">{{ $patrolData['shift_name'] ?? '-' }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Waktu Pemindaian</span>
-                        <span class="detail-value">{{ $patrolData['scanned_time'] ?? '-' }}</span>
-                    </div>
+                    @if(isset($locationData['latitude']) && $locationData['latitude'])
+                        <div class="detail-item">
+                            <span class="detail-label">Koordinat GPS</span>
+                            <span class="detail-value">{{ $locationData['latitude'] }}, {{ $locationData['longitude'] }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Radius Verifikasi</span>
+                            <span class="detail-value">{{ $locationData['radius_meters'] ?? 50 }} meter</span>
+                        </div>
+                    @endif
                 @endif
             </div>
             <div class="actions">
-                <a href="{{ $redirectUrl ?? route('filament.admin.pages.dashboard') }}" class="btn btn-primary">Kembali ke Dashboard</a>
+                <a href="{{ $redirectUrl ?? route('filament.admin.pages.dashboard') }}" class="btn btn-primary">← Kembali</a>
             </div>
         @else
             <div class="badge {{ isset($icon) && strpos($icon, '⚠️') !== false ? 'badge-warning' : 'badge-danger' }}">
                 {{ isset($icon) && strpos($icon, '⚠️') !== false ? '⚠️ Perhatian' : '❌ Gagal' }}
             </div>
             <div class="icon">{{ $icon ?? '❌' }}</div>
-            <h1 class="title">{{ $title ?? 'QR Code Tidak Valid' }}</h1>
-            <p class="message">{{ $message ?? 'QR code tidak dapat divalidasi' }}</p>
+            <h1 class="title">{{ $title ?? 'QR Lokasi Tidak Valid' }}</h1>
+            <p class="message">{{ $message ?? 'QR lokasi tidak dapat divalidasi' }}</p>
             <div class="actions">
                 <button onclick="window.history.back()" class="btn btn-secondary">← Kembali</button>
                 <a href="{{ route('filament.admin.pages.dashboard') }}" class="btn btn-primary">Dashboard</a>

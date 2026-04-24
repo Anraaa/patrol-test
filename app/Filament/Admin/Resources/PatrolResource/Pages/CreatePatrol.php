@@ -4,7 +4,6 @@ namespace App\Filament\Admin\Resources\PatrolResource\Pages;
 
 use App\Filament\Admin\Resources\PatrolResource;
 use App\Models\Location;
-use App\Models\Patrol;
 use App\Models\PatrolCheckpoint;
 use App\Models\Shift;
 use Filament\Notifications\Notification;
@@ -17,7 +16,6 @@ class CreatePatrol extends CreateRecord
     protected static string $resource = PatrolResource::class;
 
     protected ?string $scannedLocationId = null;
-    protected ?string $qrScanToken = null;
 
     public bool $viaScan = false;
 
@@ -91,24 +89,6 @@ class CreatePatrol extends CreateRecord
     {
         parent::mount();
 
-        // Check for QR scan token from public scan
-        $qrToken = session('qr_scan_token');
-        if ($qrToken) {
-            $patrol = Patrol::where('qr_code_token', $qrToken)->first();
-            
-            if ($patrol && !$patrol->isValidated()) {
-                $this->qrScanToken = $qrToken;
-                
-                Notification::make()
-                    ->title('QR Code Terdeteksi')
-                    ->body('✅ QR code tervalidasi. Silahkan lengkapi laporan patroli.')
-                    ->success()
-                    ->send();
-            }
-            
-            session()->forget('qr_scan_token');
-        }
-
         $uuid = request()->query('loc');
 
         if ($uuid) {
@@ -161,11 +141,6 @@ class CreatePatrol extends CreateRecord
 
         if ($this->checkpointLocationId && empty($data['location_id'])) {
             $data['location_id'] = $this->checkpointLocationId;
-        }
-
-        // Add QR token if coming from public QR scan
-        if ($this->qrScanToken) {
-            $data['qr_code_token'] = $this->qrScanToken;
         }
 
         return $data;

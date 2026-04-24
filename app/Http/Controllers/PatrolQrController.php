@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Location;
 use App\Models\Patrol;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -69,45 +70,32 @@ class PatrolQrController extends Controller
     }
 
     /**
-     * Public QR scan endpoint: validate QR, check auth, redirect to form
-     * Flow: Scan QR → Validate → Redirect to login or patrol form
+     * Public QR scan endpoint: scan location QR code
+     * Flow: Scan QR Lokasi → Validate Location → Check Auth → Redirect to Patrol Form
+     * 
+     * User harus scan QR lokasi terlebih dahulu sebelum bisa membuat laporan patrol
      */
-    public function publicScan(string $token)
+    public function publicScan(string $uuid)
     {
-        // Validate QR token exists
-        $patrol = Patrol::where('qr_code_token', $token)
-            ->with(['user', 'location', 'shift'])
-            ->first();
+        // Validate location exists by UUID
+        $location = Location::where('uuid', $uuid)->first();
 
-        if (!$patrol) {
+        if (!$location) {
             return view('qr-scan-result', [
                 'success' => false,
                 'icon' => '❌',
-                'title' => 'QR Code Tidak Valid',
-                'message' => 'Token QR code tidak ditemukan atau tidak valid.',
-            ]);
-        }
-
-        // Check if QR already validated
-        if ($patrol->isValidated()) {
-            return view('qr-scan-result', [
-                'success' => false,
-                'icon' => '⚠️',
-                'title' => 'QR Code Sudah Dipindai',
-                'message' => "Patrol sudah ter-validasi pada {$patrol->qr_scanned_at->format('d/m/Y H:i')}",
+                'title' => 'QR Lokasi Tidak Valid',
+                'message' => 'Lokasi dengan QR code ini tidak ditemukan dalam sistem.',
             ]);
         }
 
         // If not authenticated → redirect to login
         if (!auth()->check()) {
-            session()->put('url.intended', route('patrol.qr-scan', ['token' => $token]));
+            session()->put('url.intended', route('patrol.qr-scan', ['uuid' => $uuid]));
             return redirect()->route('filament.admin.auth.login');
         }
 
-        // If authenticated → redirect to patrol form with QR token
-        // Store token in session to pass to form
-        session()->put('qr_scan_token', $token);
-        
-        return redirect()->route('filament.admin.resources.patrols.create');
+        // If authenticated → redirect to patrol form with location pre-filled
+        return redirect()->route('filament.admin.resources.patrols.create', ['loc' => $uuid]);
     }
 }
