@@ -48,15 +48,21 @@ class CreatePatrol extends CreateRecord
 
     #[On('checkpointDataCollected')]
     public function onCheckpointDataCollected(
-        ?int    $locationId       = null,
-        ?string $uuid             = null,
-        ?string $locationName     = null,
-        ?string $facePhotoBase64  = null,
-        ?string $signatureDataUrl = null,
+        ?int    $location_id        = null,
+        ?string $uuid              = null,
+        ?string $location_name     = null,
+        ?string $face_photo_base64 = null,
+        ?string $signature_data_url = null,
     ): void {
-        // Priority: use passed locationId, fallback to form state
-        if ($locationId) {
-            $this->checkpointLocationId = $locationId;
+        \Illuminate\Support\Facades\Log::debug('Listener onCheckpointDataCollected called', [
+            'location_id' => $location_id,
+            'face_photo_base64' => $face_photo_base64 ? '✓ ada' : '✗ kosong',
+            'signature_data_url' => $signature_data_url ? '✓ ada' : '✗ kosong',
+        ]);
+
+        // Priority: use passed location_id, fallback to form state
+        if ($location_id) {
+            $this->checkpointLocationId = $location_id;
         } else {
             // Get from form state if not passed from event
             $formState = $this->form->getState();
@@ -64,19 +70,24 @@ class CreatePatrol extends CreateRecord
         }
         
         $this->checkpointUuid         = $uuid;
-        $this->checkpointFacePhotoB64 = $facePhotoBase64;
-        $this->checkpointSignature    = $signatureDataUrl;
+        $this->checkpointFacePhotoB64 = $face_photo_base64;
+        $this->checkpointSignature    = $signature_data_url;
         $this->checkpointCompleted    = true;
+
+        \Illuminate\Support\Facades\Log::debug('Checkpoint properties set', [
+            'checkpointLocationId' => $this->checkpointLocationId,
+            'checkpointCompleted' => $this->checkpointCompleted,
+        ]);
 
         // Update form fields so they persist in form submission
         try {
             $this->form->fill([
                 ...$this->form->getState(),
-                'checkpoint_face_photo_b64' => $facePhotoBase64,
-                'checkpoint_signature'      => $signatureDataUrl,
+                'checkpoint_face_photo_b64' => $face_photo_base64,
+                'checkpoint_signature'      => $signature_data_url,
             ]);
         } catch (\Throwable $e) {
-            // Silently fail if form update doesn't work
+            \Illuminate\Support\Facades\Log::error('Form fill failed', ['error' => $e->getMessage()]);
         }
 
         Notification::make()
@@ -186,7 +197,18 @@ class CreatePatrol extends CreateRecord
 
     protected function afterCreate(): void
     {
+        \Illuminate\Support\Facades\Log::debug('afterCreate called', [
+            'checkpointCompleted'   => $this->checkpointCompleted,
+            'checkpointLocationId'  => $this->checkpointLocationId,
+            'hasFacePhoto'          => !empty($this->checkpointFacePhotoB64),
+            'hasSignature'          => !empty($this->checkpointSignature),
+        ]);
+
         if (! $this->checkpointCompleted || ! $this->checkpointLocationId) {
+            \Illuminate\Support\Facades\Log::warning('Checkpoint skipped - missing data', [
+                'completed' => $this->checkpointCompleted,
+                'locationId' => $this->checkpointLocationId,
+            ]);
             return;
         }
 
@@ -200,7 +222,10 @@ class CreatePatrol extends CreateRecord
                 $path = 'checkpoint-face-photos/' . uniqid('face_') . '.' . $ext;
                 Storage::disk('public')->put($path, base64_decode($b64));
                 $facePhotoPath = $path;
-            } catch (\Throwable) {}
+                \Illuminate\Support\Facades\Log::info('Face photo saved', ['path' => $path]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Face photo save failed', ['error' => $e->getMessage()]);
+            }
         }
 
         if ($this->checkpointSignature && str_starts_with($this->checkpointSignature, 'data:')) {
@@ -209,16 +234,25 @@ class CreatePatrol extends CreateRecord
                 $path = 'checkpoint-signatures/' . uniqid('sig_') . '.png';
                 Storage::disk('public')->put($path, base64_decode($b64));
                 $signaturePath = $path;
-            } catch (\Throwable) {}
+                \Illuminate\Support\Facades\Log::info('Signature saved', ['path' => $path]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Signature save failed', ['error' => $e->getMessage()]);
+            }
         }
 
-        PatrolCheckpoint::create([
+        $checkpoint = PatrolCheckpoint::create([
             'patrol_id'   => $this->record->id,
             'location_id' => $this->checkpointLocationId,
             'user_id'     => auth()->id(),
             'face_photo'  => $facePhotoPath,
             'signature'   => $signaturePath,
             'scanned_at'  => now(),
+        ]);
+
+        \Illuminate\Support\Facades\Log::info('Checkpoint created', [
+            'checkpoint_id' => $checkpoint->id,
+            'face_photo' => $facePhotoPath,
+            'signature' => $signaturePath,
         ]);
 
         Notification::make()

@@ -208,19 +208,11 @@ function patrolCheckpoint() {
             el.width  = rect.width  || 600;
             el.height = rect.height || 200;
             
-            // Detect dark mode preference
-            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // Always use white background with black stroke (both light and dark mode)
+            this.sigCtx.fillStyle = '#ffffff';
+            this.sigCtx.strokeStyle = '#000000';
             
-            // Set canvas background and stroke colors based on theme
-            if (isDarkMode) {
-                this.sigCtx.fillStyle = '#0f172a';
-                this.sigCtx.strokeStyle = '#e2e8f0';
-            } else {
-                this.sigCtx.fillStyle = '#ffffff';
-                this.sigCtx.strokeStyle = '#1e1b4b';
-            }
-            
-            // Clear canvas with appropriate background
+            // Clear canvas with white background
             this.sigCtx.fillRect(0, 0, el.width, el.height);
             this.sigCtx.lineWidth   = 2.5;
             this.sigCtx.lineCap     = 'round';
@@ -257,14 +249,8 @@ function patrolCheckpoint() {
         clearSignature() {
             if (!this.sigCanvas) return;
             
-            // Detect dark mode preference for clear operation
-            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (isDarkMode) {
-                this.sigCtx.fillStyle = '#0f172a';
-            } else {
-                this.sigCtx.fillStyle = '#ffffff';
-            }
+            // Always use white background (both light and dark mode)
+            this.sigCtx.fillStyle = '#ffffff';
             
             this.sigCtx.fillRect(0, 0, this.sigCanvas.width, this.sigCanvas.height);
             this.hasSignature = false;
@@ -284,11 +270,15 @@ function patrolCheckpoint() {
                 const formLocation = document.querySelector('input[name="data[location_id]"]')?.value 
                                   || document.querySelector('select[name="data[location_id]"]')?.value;
                 
-                Livewire.dispatch('checkpointDataCollected', {
-                    locationId:       parseInt(formLocation) || null,
-                    facePhotoBase64:  this.facePhotoBase64,
-                    signatureDataUrl: this.signatureDataUrl,
-                });
+                const payload = {
+                    location_id:        parseInt(formLocation) || null,
+                    face_photo_base64:  this.facePhotoBase64,
+                    signature_data_url: this.signatureDataUrl,
+                };
+                
+                console.log('🔄 Dispatching checkpointDataCollected:', payload);
+                
+                Livewire.dispatch('checkpointDataCollected', payload);
             }
 
             this.saving = false;
