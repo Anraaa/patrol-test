@@ -41,8 +41,8 @@ class ScanQrCode extends Page
             return;
         }
 
-        // Find patrol dengan qr_code_token yang sesuai
-        $patrol = Patrol::where('qr_code_token', $this->qrToken)->first();
+        // Find patrol dengan qr_code_token yang sesuai - preload relationships
+        $patrol = Patrol::with(['user', 'location'])->where('qr_code_token', $this->qrToken)->first();
 
         if (!$patrol) {
             $this->statusType = 'error';
@@ -61,8 +61,10 @@ class ScanQrCode extends Page
 
         // Validate with QR code
         if ($patrol->validateWithQrCode($this->qrToken, request()->ip())) {
+            $userName = $patrol->user?->name ?? 'Petugas';
+            $locationName = $patrol->location?->name ?? 'Lokasi';
             $this->statusType = 'success';
-            $this->statusMessage = "✓ Patrol berhasil di-validasi! User: {$patrol->user->name}, Lokasi: {$patrol->location->name}";
+            $this->statusMessage = "✓ Patrol berhasil di-validasi! User: {$userName}, Lokasi: {$locationName}";
             $this->scannedPatrol = $patrol;
 
             // Emit event untuk dashboard update
@@ -71,7 +73,7 @@ class ScanQrCode extends Page
 
             Notification::make()
                 ->title('Validasi QR Code Berhasil')
-                ->body("Patrol oleh {$patrol->user->name} di {$patrol->location->name} telah ter-validasi")
+                ->body("Patrol oleh {$userName} di {$locationName} telah ter-validasi")
                 ->success()
                 ->send();
         } else {

@@ -53,9 +53,9 @@ class PatrolQrController extends Controller
                 'message' => 'Patrol berhasil di-validasi',
                 'patrol' => [
                     'id' => $patrol->id,
-                    'user_name' => $patrol->user->name,
-                    'location_name' => $patrol->location->name,
-                    'shift_name' => $patrol->shift->name ?? 'N/A',
+                    'user_name' => $patrol->user?->name ?? 'Unknown',
+                    'location_name' => $patrol->location?->name ?? 'Unknown',
+                    'shift_name' => $patrol->shift?->name ?? 'N/A',
                     'patrol_time' => $patrol->patrol_time->format('d/m/Y H:i:s'),
                     'qr_scanned_at' => $patrol->qr_scanned_at->format('d/m/Y H:i:s'),
                     'qr_scanned_ip' => $patrol->qr_scanned_ip,

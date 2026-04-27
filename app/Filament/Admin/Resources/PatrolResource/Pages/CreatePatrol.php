@@ -195,6 +195,6 @@ class CreatePatrol extends CreateRecord
             ?? Shift::orderBy('id')->skip($number - 1)->first()
             ?? Shift::orderBy('id')->first();
 
-        return $shift->id;
+        return $shift?->id;
     }
 }
