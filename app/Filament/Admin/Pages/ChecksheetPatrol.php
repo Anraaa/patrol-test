@@ -127,9 +127,29 @@ class ChecksheetPatrol extends Page implements HasForms
 
         $collection    = $query->get();
         
+        // Debug: log first patrol data
+        if ($collection->isNotEmpty()) {
+            $first = $collection->first();
+            \Illuminate\Support\Facades\Log::debug('First patrol data', [
+                'patrol_id' => $first->id,
+                'employee_id' => $first->employee_id,
+                'has_employee' => $first->employee ? 'yes' : 'no',
+                'employee_shfgroup' => $first->employee?->shfgroup ?? 'null',
+                'employee_data' => $first->employee?->toArray() ?? 'null',
+            ]);
+        }
+        
         // Map checkpoints signature to patrol for display
         $this->patrols = $collection->map(function ($patrol) {
             $arr = $patrol->toArray();
+            
+            // Debug: log array structure
+            if (empty($arr['employee']['shfgroup'] ?? null)) {
+                \Illuminate\Support\Facades\Log::debug('Empty shfgroup for patrol', [
+                    'patrol_id' => $arr['id'],
+                    'employee' => $arr['employee'] ?? 'null',
+                ]);
+            }
             
             // If patrol has no signature, try to get from first checkpoint
             if (empty($arr['signature']) && !empty($arr['checkpoints'])) {
