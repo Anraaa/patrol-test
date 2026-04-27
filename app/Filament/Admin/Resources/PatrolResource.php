@@ -512,12 +512,6 @@ class PatrolResource extends Resource
             // HEADER ACTIONS
             // ─────────────────────────────────────────────────────────────────
             ->headerActions([
-                Tables\Actions\Action::make('scan_qr')
-                    ->label('Scan QR Patrol')
-                    ->icon('heroicon-o-qr-code')
-                    ->color('indigo')
-                    ->url(fn () => static::getUrl('scan-qr'))
-                    ->button(),
             ])
 
             // ─────────────────────────────────────────────────────────────────
