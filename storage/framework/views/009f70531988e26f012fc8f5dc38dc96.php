@@ -112,8 +112,8 @@
         }
         @keyframes floatBubble {
             0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
-            33%       { transform: translateY(-12px) rotate(5deg); opacity: 0.9; }
-            66%       { transform: translateY(-6px) rotate(-3deg); opacity: 0.75; }
+            33%      { transform: translateY(-12px) rotate(5deg); opacity: 0.9; }
+            66%      { transform: translateY(-6px) rotate(-3deg); opacity: 0.75; }
         }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(24px); }
@@ -133,7 +133,7 @@
         }
         @keyframes softPulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.85; transform: scale(1.04); }
+            50%      { opacity: 0.85; transform: scale(1.04); }
         }
 
         /* ===== HERO HEADER ===== */
@@ -485,11 +485,6 @@
             box-shadow: 0 0 0 3px rgba(129,140,248,0.35), 0 4px 12px rgba(99,102,241,0.4);
         }
 
-        /* ===== ANIMATIONS ===== */
-        .slide-up   { animation: slideUp 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
-        .slide-down { animation: slideDown 0.25s ease-in forwards; }
-        .fade-scale-in { animation: fadeInScale 0.25s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
-
         /* ===== SCROLLBAR ===== */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: rgba(99,102,241,0.08); border-radius: 10px; }
@@ -765,7 +760,7 @@
                             <span class="text-3xl font-black text-white"><?php echo e($avgCompletion); ?>%</span>
                         </div>
                         <div class="w-full h-2 rounded-full overflow-hidden shadow-inner progress-track">
-                            <div class="h-full rounded-full bg-white/70 progress-bar" style="width: <?php echo e($avgCompletion); ?>%;"></div>
+                            <div class="h-full bg-white/70 rounded-full progress-bar" style="width: <?php echo e($avgCompletion); ?>%;"></div>
                         </div>
                     </div>
                     <div class="stat-icon flex h-12 w-12 items-center justify-center rounded-xl shadow-md ml-3">
@@ -1169,7 +1164,11 @@
                         $cellDate   = \Carbon\Carbon::create($data['year'], $data['month'], $day);
                         $isWeekend  = in_array($cellDate->dayOfWeek, [0, 6]);
                         $isToday    = $cellDate->isToday();
-                        $dayPics    = $calendarData[$day] ?? [];
+                        
+                        // FILTER: Hanya ambil petugas dengan patrol_count > 0 untuk hari ini
+                        $rawDayPics = $calendarData[$day] ?? [];
+                        $dayPics    = array_filter($rawDayPics, fn($p) => $p['patrol_count'] > 0);
+
                         $showPics   = array_slice($dayPics, 0, 3, true);
                         $extraCount = count($dayPics) - count($showPics);
                         $dayPatrol  = array_sum(array_column($dayPics, 'patrol_count'));
@@ -1328,11 +1327,6 @@
             orange:  'from-orange-400 to-orange-600',
         };
 
-        // Dark mode aware detail chip bg colors
-        function isDark() {
-            return document.documentElement.classList.contains('dark');
-        }
-
         const detailBgLight = [
             'from-blue-50 to-cyan-50',
             'from-violet-50 to-purple-50',
@@ -1352,7 +1346,6 @@
             'dark:border-amber-800/50','dark:border-indigo-800/50','dark:border-teal-800/50','dark:border-fuchsia-800/50',
         ];
 
-        // Badge bg colors for calendar filter injection
         const colorMap = {
             sky:     { bg: 'bg-sky-100 dark:bg-sky-900/50',     text: 'text-sky-700 dark:text-sky-300',     dot: 'bg-sky-500',     border: 'border-sky-300 dark:border-sky-700' },
             emerald: { bg: 'bg-emerald-100 dark:bg-emerald-900/50', text: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500', border: 'border-emerald-300 dark:border-emerald-700' },
@@ -1402,8 +1395,11 @@
                     cell.querySelectorAll('[data-pic-name]').forEach(b => b.style.display = '');
                     cell.querySelectorAll('.extra-count-badge').forEach(el => el.style.display = '');
                 } else {
-                    const hasUser = Object.prototype.hasOwnProperty.call(dayData, filteredUser);
-                    if (hasUser) {
+                    const picData = dayData[filteredUser];
+                    // FILTER: Cek jika petugas ada dan memiliki patrol > 0 pada hari tersebut
+                    const hasUserWithPatrol = picData && picData.patrol_count > 0;
+
+                    if (hasUserWithPatrol) {
                         cell.style.opacity       = '1';
                         cell.style.pointerEvents = 'auto';
                         cell.querySelectorAll('[data-pic-name]').forEach(b => {
@@ -1413,12 +1409,11 @@
 
                         const existingBadge  = cell.querySelector(`[data-pic-name="${CSS.escape(filteredUser)}"]`);
                         const alreadyInjected = cell.querySelector('.dynamic-injected-badge');
+                        
                         if (!existingBadge && !alreadyInjected) {
-                            const picData  = dayData[filteredUser];
                             const colorKey = colorPalette[picData.color_index % colorPalette.length];
                             const cs       = colorMap[colorKey] || colorMap['indigo'];
                             const hasMissed   = picData.missed_count > 0;
-                            const percentage  = picData.total_assigned > 0 ? Math.round((picData.patrol_count / picData.total_assigned) * 100) : 0;
                             const shortName   = filteredUser.length > 9 ? filteredUser.substring(0,9) + '..' : filteredUser;
 
                             let container = cell.querySelector('.space-y-1, .space-y-1\\.5');
@@ -1441,6 +1436,7 @@
                             container.appendChild(el);
                         }
                     } else {
+                        // Jika 0 patrol, kita sembunyikan semua dan gelapkan cell (dimmed)
                         cell.style.opacity       = '0.25';
                         cell.style.pointerEvents = 'none';
                         cell.querySelectorAll('[data-pic-name]').forEach(b => b.style.display = 'none');
@@ -1494,8 +1490,11 @@
             const cellDate  = new Date(monthYear.year, monthYear.month - 1, day);
             title.textContent = `${dayNamesFull[cellDate.getDay()]}, ${day} ${monthNamesId[monthYear.month - 1]} ${monthYear.year}`;
 
-            const dayData = calendarData[day] ?? {};
-            const pics    = Object.entries(dayData);
+            const dayDataRaw = calendarData[day] ?? {};
+            
+            // FILTER: Tampilkan di Detail Panel hanya petugas dengan patrol_count > 0
+            const pics = Object.entries(dayDataRaw).filter(([name, d]) => d.patrol_count > 0);
+            
             const totalP  = pics.reduce((s,[,d]) => s + d.patrol_count, 0);
             const totalM  = pics.reduce((s,[,d]) => s + d.missed_count, 0);
 
