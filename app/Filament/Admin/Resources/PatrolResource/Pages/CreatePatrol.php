@@ -134,6 +134,14 @@ class CreatePatrol extends CreateRecord
             $data['location_id'] = $this->checkpointLocationId;
         }
 
+        // ── Set QR validation data if checkpoint completed ──────────────────
+        // Jika checkpoint (foto + signature) sudah selesai, berarti user sudah scan QR
+        if ($this->checkpointCompleted && $this->checkpointLocationId) {
+            $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
+            $data['qr_scanned_at'] = now();
+            $data['qr_scanned_ip'] = request()?->ip();
+        }
+
         return $data;
     }
 
