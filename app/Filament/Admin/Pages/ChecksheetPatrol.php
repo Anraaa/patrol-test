@@ -91,13 +91,21 @@ class ChecksheetPatrol extends Page implements HasForms
     public function loadData(): void
     {
         $query = Patrol::with(['shift', 'user', 'employee', 'location'])
-            ->orderBy('patrol_time');
+            ->orderBy('patrol_time', 'desc');
 
         if ($this->date_from) {
-            $query->whereDate('patrol_time', '>=', $this->date_from);
+            // Convert local date to UTC for comparison
+            $dateFrom = \Carbon\Carbon::createFromFormat('Y-m-d', $this->date_from, config('app.timezone'))
+                ->startOfDay()
+                ->setTimezone('UTC');
+            $query->where('patrol_time', '>=', $dateFrom);
         }
         if ($this->date_until) {
-            $query->whereDate('patrol_time', '<=', $this->date_until);
+            // Convert local date to UTC for comparison
+            $dateUntil = \Carbon\Carbon::createFromFormat('Y-m-d', $this->date_until, config('app.timezone'))
+                ->endOfDay()
+                ->setTimezone('UTC');
+            $query->where('patrol_time', '<=', $dateUntil);
         }
         if ($this->shift_id) {
             $query->where('shift_id', $this->shift_id);
