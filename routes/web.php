@@ -486,15 +486,38 @@ Route::get('/admin/patrols/checksheet/export-pdf', function () {
     $shiftId    = request('shift_id');
     $locationId = request('location_id');
 
-    $query = \App\Models\Patrol::with(['shift', 'user', 'employee.department', 'location'])
-        ->orderBy('patrol_time');
+    $query = \App\Models\Patrol::with(['shift', 'user', 'employee.department', 'location', 'checkpoints'])
+        ->orderBy('patrol_time', 'desc');
 
-    if ($dateFrom)   $query->whereDate('patrol_time', '>=', $dateFrom);
-    if ($dateUntil)  $query->whereDate('patrol_time', '<=', $dateUntil);
+    if ($dateFrom) {
+        try {
+            $from = \Carbon\Carbon::parse($dateFrom, config('app.timezone'))
+                ->startOfDay()
+                ->setTimezone('UTC');
+            $query->where('patrol_time', '>=', $from);
+        } catch (\Throwable $e) {}
+    }
+    if ($dateUntil) {
+        try {
+            $until = \Carbon\Carbon::parse($dateUntil, config('app.timezone'))
+                ->endOfDay()
+                ->setTimezone('UTC');
+            $query->where('patrol_time', '<=', $until);
+        } catch (\Throwable $e) {}
+    }
     if ($shiftId)    $query->where('shift_id', $shiftId);
     if ($locationId) $query->where('location_id', $locationId);
 
-    $patrols = $query->get();
+    $patrols = $query->get()->map(function ($patrol) {
+        // Get signature from first checkpoint if patrol has no signature
+        if (empty($patrol->signature) && $patrol->checkpoints->isNotEmpty()) {
+            $checkpoint = $patrol->checkpoints->firstWhere('signature', '!=', null);
+            if ($checkpoint) {
+                $patrol->signature = $checkpoint->signature;
+            }
+        }
+        return $patrol;
+    });
 
     $filterParts = [];
     if ($dateFrom && $dateUntil) {
@@ -529,15 +552,38 @@ Route::get('/admin/patrols/checksheet/export-excel', function () {
     $shiftId    = request('shift_id');
     $locationId = request('location_id');
 
-    $query = \App\Models\Patrol::with(['shift', 'user', 'employee.department', 'location'])
-        ->orderBy('patrol_time');
+    $query = \App\Models\Patrol::with(['shift', 'user', 'employee.department', 'location', 'checkpoints'])
+        ->orderBy('patrol_time', 'desc');
 
-    if ($dateFrom)   $query->whereDate('patrol_time', '>=', $dateFrom);
-    if ($dateUntil)  $query->whereDate('patrol_time', '<=', $dateUntil);
+    if ($dateFrom) {
+        try {
+            $from = \Carbon\Carbon::parse($dateFrom, config('app.timezone'))
+                ->startOfDay()
+                ->setTimezone('UTC');
+            $query->where('patrol_time', '>=', $from);
+        } catch (\Throwable $e) {}
+    }
+    if ($dateUntil) {
+        try {
+            $until = \Carbon\Carbon::parse($dateUntil, config('app.timezone'))
+                ->endOfDay()
+                ->setTimezone('UTC');
+            $query->where('patrol_time', '<=', $until);
+        } catch (\Throwable $e) {}
+    }
     if ($shiftId)    $query->where('shift_id', $shiftId);
     if ($locationId) $query->where('location_id', $locationId);
 
-    $patrols = $query->get();
+    $patrols = $query->get()->map(function ($patrol) {
+        // Get signature from first checkpoint if patrol has no signature
+        if (empty($patrol->signature) && $patrol->checkpoints->isNotEmpty()) {
+            $checkpoint = $patrol->checkpoints->firstWhere('signature', '!=', null);
+            if ($checkpoint) {
+                $patrol->signature = $checkpoint->signature;
+            }
+        }
+        return $patrol;
+    });
 
     $locationName = $locationId ? (\App\Models\Location::find($locationId)?->name ?? 'Semua Area') : 'Semua Area';
 

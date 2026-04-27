@@ -1,4 +1,13 @@
-<x-filament-panels::page>
+<?php if (isset($component)) { $__componentOriginal166a02a7c5ef5a9331faf66fa665c256 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.index','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('filament-panels::page'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
 
 <script>
     document.addEventListener('livewire:initialized', function () {
@@ -512,7 +521,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
-{{-- ── Hero Bar ─────────────────────────────────────────────────────────────── --}}
+
 <div class="cs-hero cs-panel">
     <div class="cs-hero-grid"></div>
     <div>
@@ -521,11 +530,12 @@
     </div>
     <div class="cs-hero-badge">
         <span class="cs-hero-badge-dot"></span>
-        {{ now()->translatedFormat('d F Y') }}
+        <?php echo e(now()->translatedFormat('d F Y')); ?>
+
     </div>
 </div>
 
-{{-- ── Filter Panel ─────────────────────────────────────────────────────────── --}}
+
 <div class="cs-card cs-panel" style="margin-bottom:20px;">
     <div class="cs-card-header">
         <span class="cs-card-header-label">
@@ -539,12 +549,13 @@
     </div>
     <div class="cs-card-body">
         <form wire:submit.prevent>
-            {{ $this->form }}
+            <?php echo e($this->form); ?>
+
         </form>
 
         <div style="margin-top:16px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
 
-            {{-- Terapkan Filter --}}
+            
             <button
                 wire:click="loadData"
                 wire:loading.attr="disabled"
@@ -564,7 +575,7 @@
                 Terapkan Filter
             </button>
 
-            {{-- Export PDF --}}
+            
             <button
                 wire:click="exportPdf"
                 wire:loading.attr="disabled"
@@ -585,7 +596,7 @@
                 Export PDF
             </button>
 
-            {{-- Export Excel --}}
+            
             <button
                 wire:click="exportExcel"
                 wire:loading.attr="disabled"
@@ -606,29 +617,29 @@
                 Export Excel
             </button>
 
-            {{-- Total chip --}}
+            
             <span class="cs-total-chip">
                 <svg style="width:13px;height:13px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
                            a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                Total: <strong>{{ $total }}</strong> data
+                Total: <strong><?php echo e($total); ?></strong> data
             </span>
         </div>
     </div>
 </div>
 
-{{-- ── Summary Cards ────────────────────────────────────────────────────────── --}}
-@php
+
+<?php
     $sudahParaf = collect($patrols)->filter(fn($r) => !empty($r['signature']))->count();
     $belumParaf = collect($patrols)->filter(fn($r) =>  empty($r['signature']))->count();
     $pctSelesai = $total > 0 ? round($sudahParaf / $total * 100) : 0;
-@endphp
+?>
 
 <div class="cs-stats cs-panel">
 
-    {{-- Total --}}
+    
     <div class="cs-stat cs-stat-total">
         <div class="cs-stat-icon">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -638,11 +649,11 @@
             </svg>
         </div>
         <div class="cs-stat-label">Total Patrol</div>
-        <div class="cs-stat-value">{{ $total }}</div>
+        <div class="cs-stat-value"><?php echo e($total); ?></div>
         <div class="cs-stat-meta">periode terpilih</div>
     </div>
 
-    {{-- Sudah Paraf --}}
+    
     <div class="cs-stat cs-stat-done">
         <div class="cs-stat-icon">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -651,14 +662,14 @@
             </svg>
         </div>
         <div class="cs-stat-label">Sudah Paraf</div>
-        <div class="cs-stat-value">{{ $sudahParaf }}</div>
-        <div class="cs-stat-meta">{{ $pctSelesai }}% selesai</div>
+        <div class="cs-stat-value"><?php echo e($sudahParaf); ?></div>
+        <div class="cs-stat-meta"><?php echo e($pctSelesai); ?>% selesai</div>
         <div class="cs-progress-wrap" style="margin-top:12px;">
-            <div class="cs-progress-bar" style="width: {{ $pctSelesai }}%;"></div>
+            <div class="cs-progress-bar" style="width: <?php echo e($pctSelesai); ?>%;"></div>
         </div>
     </div>
 
-    {{-- Belum Paraf --}}
+    
     <div class="cs-stat cs-stat-pending">
         <div class="cs-stat-icon">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -668,13 +679,13 @@
             </svg>
         </div>
         <div class="cs-stat-label">Belum Paraf</div>
-        <div class="cs-stat-value">{{ $belumParaf }}</div>
+        <div class="cs-stat-value"><?php echo e($belumParaf); ?></div>
         <div class="cs-stat-meta">perlu ditindaklanjuti</div>
     </div>
 
 </div>
 
-{{-- ── Table ────────────────────────────────────────────────────────────────── --}}
+
 <div class="cs-card cs-panel">
 
     <div class="cs-card-header">
@@ -686,9 +697,9 @@
             </svg>
             Data Checksheet Patrol
         </span>
-        @if ($total > 0)
-            <span class="cs-record-badge">{{ $total }} record</span>
-        @endif
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($total > 0): ?>
+            <span class="cs-record-badge"><?php echo e($total); ?> record</span>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
     <div class="cs-table-wrap">
@@ -705,8 +716,8 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($patrols as $i => $row)
-                    @php
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $patrols; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $patrolTime = $row['patrol_time']
                             ? \Carbon\Carbon::parse($row['patrol_time'])
                             : null;
@@ -731,66 +742,68 @@
                                 ->map(fn($w) => $w[0] ?? '')
                                 ->implode('')
                         );
-                    @endphp
+                    ?>
 
                     <tr>
-                        {{-- No --}}
+                        
                         <td class="tc">
-                            <div class="cs-rownum">{{ $i + 1 }}</div>
+                            <div class="cs-rownum"><?php echo e($i + 1); ?></div>
                         </td>
 
-                        {{-- Tanggal --}}
+                        
                         <td>
                             <div class="cs-date-main">
-                                {{ $patrolTime?->translatedFormat('d F Y') ?? '—' }}
+                                <?php echo e($patrolTime?->translatedFormat('d F Y') ?? '—'); ?>
+
                             </div>
-                            @if ($patrolTime)
-                                <div class="cs-date-rel">{{ $patrolTime->diffForHumans() }}</div>
-                            @endif
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($patrolTime): ?>
+                                <div class="cs-date-rel"><?php echo e($patrolTime->diffForHumans()); ?></div>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </td>
 
-                        {{-- Shift --}}
+                        
                         <td>
-                            @if ($shiftName)
-                                <span class="cs-shift {{ $shiftClass }}">{{ $shiftName }}</span>
-                            @else
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($shiftName): ?>
+                                <span class="cs-shift <?php echo e($shiftClass); ?>"><?php echo e($shiftName); ?></span>
+                            <?php else: ?>
                                 <span style="color:#d1d5db;">—</span>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </td>
 
-                        {{-- Group --}}
+                        
                         <td>
                             <span class="cs-group">
                                 <span class="cs-group-dot"></span>
-                                {{ $shfgroup }}
+                                <?php echo e($shfgroup); ?>
+
                             </span>
                         </td>
 
-                        {{-- Jam --}}
+                        
                         <td class="tc">
-                            @if ($patrolTime)
-                                <span class="cs-time">{{ $patrolTime->format('H:i') }}</span>
-                            @else
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($patrolTime): ?>
+                                <span class="cs-time"><?php echo e($patrolTime->format('H:i')); ?></span>
+                            <?php else: ?>
                                 <span style="color:#d1d5db;">—</span>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </td>
 
-                        {{-- Petugas --}}
+                        
                         <td>
                             <div class="cs-officer">
-                                <div class="cs-avatar">{{ $initials }}</div>
-                                <span class="cs-officer-name">{{ $nameStr }}</span>
+                                <div class="cs-avatar"><?php echo e($initials); ?></div>
+                                <span class="cs-officer-name"><?php echo e($nameStr); ?></span>
                             </div>
                         </td>
 
-                        {{-- Paraf --}}
+                        
                         <td class="tc">
-                            @if ($signature && str_starts_with($signature, 'data:image'))
-                                <img src="{{ $signature }}" alt="Paraf" class="cs-sig-img">
-                            @elseif ($signature)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($signature) }}"
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($signature && str_starts_with($signature, 'data:image')): ?>
+                                <img src="<?php echo e($signature); ?>" alt="Paraf" class="cs-sig-img">
+                            <?php elseif($signature): ?>
+                                <img src="<?php echo e(\Illuminate\Support\Facades\Storage::disk('public')->url($signature)); ?>"
                                      alt="Paraf" class="cs-sig-img" onerror="this.style.display='none'">
-                            @else
+                            <?php else: ?>
                                 <span class="cs-sig-pending">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -799,11 +812,11 @@
                                     </svg>
                                     Belum
                                 </span>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </td>
                     </tr>
 
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7">
                             <div class="cs-empty">
@@ -821,11 +834,20 @@
                             </div>
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </tbody>
         </table>
     </div>
 
 </div>
 
-</x-filament-panels::page>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $attributes = $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $component = $__componentOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?><?php /**PATH /root/gawe/PatrolHR/resources/views/filament/admin/pages/checksheet-patrol.blade.php ENDPATH**/ ?>

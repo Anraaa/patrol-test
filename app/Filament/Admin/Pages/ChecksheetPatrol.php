@@ -90,22 +90,33 @@ class ChecksheetPatrol extends Page implements HasForms
 
     public function loadData(): void
     {
-        $query = Patrol::with(['shift', 'user', 'employee', 'location'])
+        $query = Patrol::with([
+            'shift', 'user', 'employee', 'location',
+            'checkpoints' => fn($q) => $q->orderBy('scanned_at', 'asc') // Get first checkpoint with signature
+        ])
             ->orderBy('patrol_time', 'desc');
 
         if ($this->date_from) {
-            // Convert local date to UTC for comparison
-            $dateFrom = \Carbon\Carbon::createFromFormat('Y-m-d', $this->date_from, config('app.timezone'))
-                ->startOfDay()
-                ->setTimezone('UTC');
-            $query->where('patrol_time', '>=', $dateFrom);
+            try {
+                // Convert local date to UTC for comparison
+                $dateFrom = \Carbon\Carbon::parse($this->date_from, config('app.timezone'))
+                    ->startOfDay()
+                    ->setTimezone('UTC');
+                $query->where('patrol_time', '>=', $dateFrom);
+            } catch (\Throwable $e) {
+                // Fallback: skip filter if date parsing fails
+            }
         }
         if ($this->date_until) {
-            // Convert local date to UTC for comparison
-            $dateUntil = \Carbon\Carbon::createFromFormat('Y-m-d', $this->date_until, config('app.timezone'))
-                ->endOfDay()
-                ->setTimezone('UTC');
-            $query->where('patrol_time', '<=', $dateUntil);
+            try {
+                // Convert local date to UTC for comparison
+                $dateUntil = \Carbon\Carbon::parse($this->date_until, config('app.timezone'))
+                    ->endOfDay()
+                    ->setTimezone('UTC');
+                $query->where('patrol_time', '<=', $dateUntil);
+            } catch (\Throwable $e) {
+                // Fallback: skip filter if date parsing fails
+            }
         }
         if ($this->shift_id) {
             $query->where('shift_id', $this->shift_id);
@@ -115,8 +126,26 @@ class ChecksheetPatrol extends Page implements HasForms
         }
 
         $collection    = $query->get();
-        $this->total   = $collection->count();
-        $this->patrols = $collection->toArray();
+        
+        // Map checkpoints signature to patrol for display
+        $this->patrols = $collection->map(function ($patrol) {
+            $arr = $patrol->toArray();
+            
+            // If patrol has no signature, try to get from first checkpoint
+            if (empty($arr['signature']) && !empty($arr['checkpoints'])) {
+                // Find first checkpoint with signature
+                $checkpointWithSig = collect($arr['checkpoints'])
+                    ->firstWhere('signature', '!=', null);
+                
+                if ($checkpointWithSig) {
+                    $arr['signature'] = $checkpointWithSig['signature'];
+                }
+            }
+            
+            return $arr;
+        })->toArray();
+        
+        $this->total = $collection->count();
     }
 
     public function exportPdf(): void
