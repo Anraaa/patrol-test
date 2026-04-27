@@ -514,13 +514,13 @@
 
         /* ===== SELECT FILTERS ===== */
         .filter-select {
-            background: rgba(255,255,255,0.92);
+            background-color: rgba(255,255,255,0.92);
             color: #1f2937;
             border: none;
             border-radius: 0.75rem;
         }
         .dark .filter-select {
-            background: rgba(30,27,75,0.85);
+            background-color: rgba(30,27,75,0.85);
             color: #e2e8f0;
         }
         .dark .filter-select option {
