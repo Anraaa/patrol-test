@@ -280,7 +280,12 @@ function patrolCheckpoint() {
             this.saving = true;
 
             if (typeof Livewire !== 'undefined') {
+                // Get location_id dari form state
+                const formLocation = document.querySelector('input[name="data[location_id]"]')?.value 
+                                  || document.querySelector('select[name="data[location_id]"]')?.value;
+                
                 Livewire.dispatch('checkpointDataCollected', {
+                    locationId:       parseInt(formLocation) || null,
                     facePhotoBase64:  this.facePhotoBase64,
                     signatureDataUrl: this.signatureDataUrl,
                 });

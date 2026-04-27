@@ -54,11 +54,30 @@ class CreatePatrol extends CreateRecord
         ?string $facePhotoBase64  = null,
         ?string $signatureDataUrl = null,
     ): void {
-        $this->checkpointLocationId   = $locationId   ?? $this->checkpointLocationId;
-        $this->checkpointUuid         = $uuid         ?? $this->checkpointUuid;
+        // Priority: use passed locationId, fallback to form state
+        if ($locationId) {
+            $this->checkpointLocationId = $locationId;
+        } else {
+            // Get from form state if not passed from event
+            $formState = $this->form->getState();
+            $this->checkpointLocationId = $formState['location_id'] ?? null;
+        }
+        
+        $this->checkpointUuid         = $uuid;
         $this->checkpointFacePhotoB64 = $facePhotoBase64;
         $this->checkpointSignature    = $signatureDataUrl;
         $this->checkpointCompleted    = true;
+
+        // Update form fields so they persist in form submission
+        try {
+            $this->form->fill([
+                ...$this->form->getState(),
+                'checkpoint_face_photo_b64' => $facePhotoBase64,
+                'checkpoint_signature'      => $signatureDataUrl,
+            ]);
+        } catch (\Throwable $e) {
+            // Silently fail if form update doesn't work
+        }
 
         Notification::make()
             ->title('Checkpoint Terekam')
