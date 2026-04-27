@@ -8,7 +8,6 @@ use App\Models\PatrolCheckpoint;
 use App\Models\Shift;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
 
@@ -136,14 +135,13 @@ class CreatePatrol extends CreateRecord
         }
 
         // ── Set QR validation data if user has scanned QR location ──────────
-        // User sudah scan QR lokasi sebelum isi form, catat itu sebagai validasi QR
+        // User sudah scan QR lokasi sebelum isi form, validasi QR dicatat dengan waktu sekarang
         $qrLocationScanned = session('qr_location_scanned');
-        $qrLocationScannedAt = session('qr_location_scanned_at');
         
-        if ($qrLocationScanned && $qrLocationScannedAt) {
-            // User sudah scan QR lokasi → set QR validation
+        if ($qrLocationScanned) {
+            // User sudah scan QR lokasi → set QR validation dengan waktu saat ini (form disimpan)
             $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
-            $data['qr_scanned_at'] = \Illuminate\Support\Carbon::createFromTimestamp($qrLocationScannedAt);
+            $data['qr_scanned_at'] = now();  // Waktu saat form disimpan (sekarang)
             $data['qr_scanned_ip'] = request()?->ip();
             
             // Hapus session setelah digunakan
