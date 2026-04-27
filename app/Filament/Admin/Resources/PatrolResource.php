@@ -533,13 +533,6 @@ class PatrolResource extends Resource
                         ->color('warning')
                         ->icon('heroicon-o-pencil-square'),
 
-                    Tables\Actions\Action::make('download_report')
-                        ->label('Unduh Laporan')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->color('success')
-                        ->url(fn ($record) => route('patrol.report.download', $record))
-                        ->openUrlInNewTab(),
-
                     Tables\Actions\DeleteAction::make()
                         ->icon('heroicon-o-trash'),
                 ])

@@ -181,7 +181,7 @@ class CreatePatrol extends CreateRecord
             ->send();
     }
 
-    private function resolveShiftId(): int
+    private function resolveShiftId(): ?int
     {
         $hour = (int) now()->format('G');
 
