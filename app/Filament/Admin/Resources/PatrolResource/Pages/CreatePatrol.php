@@ -135,20 +135,27 @@ class CreatePatrol extends CreateRecord
         }
 
         // ── Set QR validation data if user has scanned QR location ──────────
-        // User sudah scan QR lokasi sebelum isi form, validasi QR dicatat dengan waktu sekarang
+        // User sudah scan QR lokasi sebelum isi form
+        // Catat waktu validasi = SEKARANG (saat form disimpan), bukan waktu scan lama
         $qrLocationScanned = session('qr_location_scanned');
         
         if ($qrLocationScanned) {
-            // User sudah scan QR lokasi → set QR validation dengan waktu saat ini (form disimpan)
+            // QR sudah discan → catat validasi dengan waktu sekarang
             $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
-            $data['qr_scanned_at'] = now();  // Waktu saat form disimpan (sekarang)
+            $data['qr_scanned_at'] = now();  // SEKARANG (bukan waktu scan lama)
             $data['qr_scanned_ip'] = request()?->ip();
             
-            // Hapus session setelah digunakan
-            session()->forget(['qr_location_scanned', 'qr_location_scanned_at']);
+            // Debug: Log untuk memastikan
+            \Illuminate\Support\Facades\Log::info('QR Validation Set', [
+                'timestamp' => $data['qr_scanned_at'],
+                'qr_location' => $qrLocationScanned,
+            ]);
+            
+            // Hapus session setelah digunakan - agar tidak terulang
+            session()->forget('qr_location_scanned');
+            session()->forget('qr_location_scanned_at');
         }
         // ── Fallback: Jika checkpoint completed tanpa location scan ────────
-        // Ini untuk case manual checkpoint tanpa location QR scan
         elseif ($this->checkpointCompleted && $this->checkpointLocationId) {
             $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
             $data['qr_scanned_at'] = now();

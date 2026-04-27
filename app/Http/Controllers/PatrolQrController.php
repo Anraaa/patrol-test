@@ -138,7 +138,8 @@ class PatrolQrController extends Controller
         if ($isValid) {
             // Set session so patrol form knows the user has scanned
             session()->put('qr_location_scanned', $uuid);
-            session()->put('qr_location_scanned_at', now()->timestamp);
+            // REMOVE: session()->put('qr_location_scanned_at', now()->timestamp);
+            // Waktu validasi akan dicatat saat form disimpan, bukan saat scan QR
 
             if (auth()->check()) {
                 $redirectUrl = '/admin/patrols/create?loc=' . $uuid;
@@ -200,7 +201,8 @@ class PatrolQrController extends Controller
 
         // ✅ SET SESSION
         session()->put('qr_location_scanned', $uuid);
-        session()->put('qr_location_scanned_at', now()->timestamp);
+        // REMOVE: session()->put('qr_location_scanned_at', now()->timestamp);
+        // Waktu validasi akan dicatat saat form disimpan, bukan saat scan QR
 
         // Return redirect URL
         return response()->json([
