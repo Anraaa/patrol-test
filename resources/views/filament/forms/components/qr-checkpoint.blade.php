@@ -207,7 +207,21 @@ function patrolCheckpoint() {
             const rect = el.getBoundingClientRect();
             el.width  = rect.width  || 600;
             el.height = rect.height || 200;
-            this.sigCtx.strokeStyle = '#1e1b4b';
+            
+            // Detect dark mode preference
+            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // Set canvas background and stroke colors based on theme
+            if (isDarkMode) {
+                this.sigCtx.fillStyle = '#0f172a';
+                this.sigCtx.strokeStyle = '#e2e8f0';
+            } else {
+                this.sigCtx.fillStyle = '#ffffff';
+                this.sigCtx.strokeStyle = '#1e1b4b';
+            }
+            
+            // Clear canvas with appropriate background
+            this.sigCtx.fillRect(0, 0, el.width, el.height);
             this.sigCtx.lineWidth   = 2.5;
             this.sigCtx.lineCap     = 'round';
             this.sigCtx.lineJoin    = 'round';
@@ -242,7 +256,17 @@ function patrolCheckpoint() {
 
         clearSignature() {
             if (!this.sigCanvas) return;
-            this.sigCtx.clearRect(0, 0, this.sigCanvas.width, this.sigCanvas.height);
+            
+            // Detect dark mode preference for clear operation
+            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (isDarkMode) {
+                this.sigCtx.fillStyle = '#0f172a';
+            } else {
+                this.sigCtx.fillStyle = '#ffffff';
+            }
+            
+            this.sigCtx.fillRect(0, 0, this.sigCanvas.width, this.sigCanvas.height);
             this.hasSignature = false;
             this.signatureDataUrl = '';
         },

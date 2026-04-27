@@ -21,6 +21,12 @@
             padding: 1.5rem;
         }
 
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            }
+        }
+
         .container {
             max-width: 480px;
             width: 100%;
@@ -34,6 +40,13 @@
             animation: slideUp 0.5s ease-out;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .card {
+                background: #1e293b;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+        }
+
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -44,6 +57,12 @@
             color: white;
             padding: 2rem;
             text-align: center;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .header {
+                background: linear-gradient(135deg, #3b4499 0%, #4a2d6a 100%);
+            }
         }
 
         .header-title {
@@ -61,6 +80,12 @@
             padding: 2rem;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .content {
+                background: #1e293b;
+            }
+        }
+
         /* Location info card */
         .location-card {
             background: #f8f9ff;
@@ -69,6 +94,13 @@
             padding: 1.25rem;
             text-align: center;
             margin-bottom: 1.5rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .location-card {
+                background: #0f172a;
+                border-color: #334155;
+            }
         }
 
         .location-icon {
@@ -83,9 +115,21 @@
             margin-bottom: 0.35rem;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .location-name {
+                color: #f1f5f9;
+            }
+        }
+
         .location-radius {
             font-size: 0.85rem;
             color: #6b7280;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .location-radius {
+                color: #cbd5e1;
+            }
         }
 
         /* State boxes */
@@ -101,9 +145,23 @@
             border: 2px solid #c7d2fe;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .state-checking {
+                background: #0c2340;
+                border-color: #3b82f6;
+            }
+        }
+
         .state-valid {
             background: #f0fdf4;
             border: 2px solid #86efac;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .state-valid {
+                background: #064e3b;
+                border-color: #10b981;
+            }
         }
 
         .state-invalid {
@@ -111,9 +169,23 @@
             border: 2px solid #fca5a5;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .state-invalid {
+                background: #7f1d1d;
+                border-color: #ef4444;
+            }
+        }
+
         .state-error {
             background: #fffbeb;
             border: 2px solid #fcd34d;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .state-error {
+                background: #78350f;
+                border-color: #fbbf24;
+            }
         }
 
         .state-icon {
@@ -139,11 +211,23 @@
             color: #111827;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .state-title {
+                color: #f1f5f9;
+            }
+        }
+
         .state-desc {
             font-size: 0.9rem;
             color: #6b7280;
             line-height: 1.5;
             margin-bottom: 1rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .state-desc {
+                color: #cbd5e1;
+            }
         }
 
         .distance-badge {
@@ -160,9 +244,23 @@
             color: #15803d;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .distance-badge.valid {
+                background: #064e3b;
+                color: #d1fae5;
+            }
+        }
+
         .distance-badge.invalid {
             background: #fee2e2;
             color: #b91c1c;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .distance-badge.invalid {
+                background: #7f1d1d;
+                color: #fecaca;
+            }
         }
 
         .auth-notice {
@@ -175,11 +273,25 @@
             margin-bottom: 1rem;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .auth-notice {
+                background: #78350f;
+                border-color: #fbbf24;
+                color: #fcd34d;
+            }
+        }
+
         .countdown {
             font-size: 0.9rem;
             color: #059669;
             font-weight: 600;
             margin-bottom: 1rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .countdown {
+                color: #10b981;
+            }
         }
 
         /* Buttons */
@@ -208,9 +320,22 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
+        @media (prefers-color-scheme: dark) {
+            .btn-primary {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+            }
+        }
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-primary:hover {
+                box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
+            }
         }
 
         .btn-outline {
@@ -219,9 +344,23 @@
             border: 2px solid #667eea;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .btn-outline {
+                color: #93c5fd;
+                border-color: #93c5fd;
+            }
+        }
+
         .btn-outline:hover {
             background: #667eea;
             color: white;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-outline:hover {
+                background: #4f46e5;
+                color: white;
+            }
         }
 
         .btn-secondary {
@@ -229,8 +368,21 @@
             color: #6b7280;
         }
 
+        @media (prefers-color-scheme: dark) {
+            .btn-secondary {
+                background: #334155;
+                color: #cbd5e1;
+            }
+        }
+
         .btn-secondary:hover {
             background: #e5e7eb;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-secondary:hover {
+                background: #475569;
+            }
         }
 
         /* Progress pulse indicator */
@@ -248,6 +400,12 @@
             background: #667eea;
             border-radius: 50%;
             animation: pulseDot 1.4s ease-in-out infinite;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .pulse-dot {
+                background: #60a5fa;
+            }
         }
 
         .pulse-dot:nth-child(2) { animation-delay: 0.2s; }
