@@ -8,6 +8,7 @@ use App\Models\PatrolCheckpoint;
 use App\Models\Shift;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
 
@@ -134,9 +135,23 @@ class CreatePatrol extends CreateRecord
             $data['location_id'] = $this->checkpointLocationId;
         }
 
-        // ── Set QR validation data if checkpoint completed ──────────────────
-        // Jika checkpoint (foto + signature) sudah selesai, berarti user sudah scan QR
-        if ($this->checkpointCompleted && $this->checkpointLocationId) {
+        // ── Set QR validation data if user has scanned QR location ──────────
+        // User sudah scan QR lokasi sebelum isi form, catat itu sebagai validasi QR
+        $qrLocationScanned = session('qr_location_scanned');
+        $qrLocationScannedAt = session('qr_location_scanned_at');
+        
+        if ($qrLocationScanned && $qrLocationScannedAt) {
+            // User sudah scan QR lokasi → set QR validation
+            $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
+            $data['qr_scanned_at'] = \Illuminate\Support\Carbon::createFromTimestamp($qrLocationScannedAt);
+            $data['qr_scanned_ip'] = request()?->ip();
+            
+            // Hapus session setelah digunakan
+            session()->forget(['qr_location_scanned', 'qr_location_scanned_at']);
+        }
+        // ── Fallback: Jika checkpoint completed tanpa location scan ────────
+        // Ini untuk case manual checkpoint tanpa location QR scan
+        elseif ($this->checkpointCompleted && $this->checkpointLocationId) {
             $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
             $data['qr_scanned_at'] = now();
             $data['qr_scanned_ip'] = request()?->ip();
