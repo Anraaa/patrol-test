@@ -31,10 +31,74 @@ class Patrol extends Model
     protected function casts(): array
     {
         return [
-            'patrol_time' => 'datetime',
-            'qr_scanned_at' => 'datetime',
+            'patrol_time' => 'datetime:Y-m-d H:i:s',
+            'qr_scanned_at' => 'datetime:Y-m-d H:i:s',
             'photos' => 'array',
         ];
+    }
+
+    /**
+     * Get qr_scanned_at with app timezone
+     */
+    public function getQrScannedAtAttribute($value)
+    {
+        if (!$value) return null;
+        
+        // Parse the database value (stored in UTC) and convert to app timezone
+        $dateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, 'UTC');
+        return $dateTime->setTimezone(config('app.timezone'));
+    }
+
+    /**
+     * Set qr_scanned_at - ensure it's stored in UTC
+     */
+    public function setQrScannedAtAttribute($value)
+    {
+        if (!$value) {
+            $this->attributes['qr_scanned_at'] = null;
+            return;
+        }
+
+        // Convert app timezone to UTC for storage
+        if (is_string($value)) {
+            $value = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
+        } elseif ($value instanceof \Carbon\Carbon) {
+            $value = $value->setTimezone(config('app.timezone'));
+        }
+
+        $this->attributes['qr_scanned_at'] = $value->setTimezone('UTC')->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Get patrol_time with app timezone
+     */
+    public function getPatrolTimeAttribute($value)
+    {
+        if (!$value) return null;
+        
+        // Parse the database value (stored in UTC) and convert to app timezone
+        $dateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, 'UTC');
+        return $dateTime->setTimezone(config('app.timezone'));
+    }
+
+    /**
+     * Set patrol_time - ensure it's stored in UTC
+     */
+    public function setPatrolTimeAttribute($value)
+    {
+        if (!$value) {
+            $this->attributes['patrol_time'] = null;
+            return;
+        }
+
+        // Convert app timezone to UTC for storage
+        if (is_string($value)) {
+            $value = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
+        } elseif ($value instanceof \Carbon\Carbon) {
+            $value = $value->setTimezone(config('app.timezone'));
+        }
+
+        $this->attributes['patrol_time'] = $value->setTimezone('UTC')->format('Y-m-d H:i:s');
     }
 
     public function user(): BelongsTo
