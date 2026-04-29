@@ -16,10 +16,11 @@ class LocationResource extends Resource
 {
     protected static ?string $model = Location::class;
 
+    protected static ?string $navigationGroup = 'Data Master';
 
     protected static ?string $pluralLabel = 'Lokasi';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 13;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

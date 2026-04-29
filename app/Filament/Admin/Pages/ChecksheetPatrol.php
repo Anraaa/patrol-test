@@ -91,8 +91,11 @@ class ChecksheetPatrol extends Page implements HasForms
     public function loadData(): void
     {
         $query = Patrol::with([
-            'shift', 'user', 'employee', 'location',
-            'checkpoints' => fn($q) => $q->orderBy('scanned_at', 'asc') // Get first checkpoint with signature
+            'shift',
+            'user',
+            'employee',  // ✅ Load employee dengan shfgroup-nya
+            'location',
+            'checkpoints' => fn($q) => $q->orderBy('scanned_at', 'asc')
         ])
             ->orderBy('patrol_time', 'desc');
 

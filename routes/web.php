@@ -644,6 +644,46 @@ Route::get('/admin/patrols/checksheet/export-excel', function () {
     );
 })->middleware('auth');
 
+Route::get('/debug/checksheet-group', function () {
+    // Simple debug endpoint for development
+    $totalPatrols = \App\Models\Patrol::count();
+    $patrolsWithEmployee = \App\Models\Patrol::whereNotNull('employee_id')->count();
+    $patrolsWithoutEmployee = \App\Models\Patrol::whereNull('employee_id')->count();
+
+    $totalEmployees = \App\Models\Employee::count();
+    $employeesWithGroup = \App\Models\Employee::whereNotNull('shfgroup')->count();
+    $employeesWithoutGroup = \App\Models\Employee::whereNull('shfgroup')->count();
+
+    $recentPatrols = \App\Models\Patrol::with('employee')
+        ->orderBy('patrol_time', 'desc')
+        ->limit(10)
+        ->get()
+        ->map(fn($p) => [
+            'id' => $p->id,
+            'employee_id' => $p->employee_id ?? 'NULL',
+            'employee_name' => $p->employee?->name ?? '-',
+            'shfgroup' => $p->employee?->shfgroup ?? 'NULL/EMPTY',
+        ]);
+
+    return response()->json([
+        'patrols' => [
+            'total' => $totalPatrols,
+            'with_employee' => $patrolsWithEmployee,
+            'without_employee' => $patrolsWithoutEmployee,
+        ],
+        'employees' => [
+            'total' => $totalEmployees,
+            'with_group' => $employeesWithGroup,
+            'without_group' => $employeesWithoutGroup,
+        ],
+        'recent_patrols' => $recentPatrols,
+        'issues' => array_filter([
+            $patrolsWithoutEmployee > 0 ? "{$patrolsWithoutEmployee} patrols have NO employee_id" : null,
+            $employeesWithoutGroup > 0 ? "{$employeesWithoutGroup} employees have NO shfgroup" : null,
+        ]),
+    ], 200, [], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+});
+
 Route::get('/', function () {
     return redirect('/admin/login');
 });

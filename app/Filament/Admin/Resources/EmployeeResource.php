@@ -14,10 +14,11 @@ class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
+    protected static ?string $navigationGroup = 'SDM & HR';
 
     protected static ?string $pluralLabel = 'Karyawan';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 20;
 
     protected static ?string $recordTitleAttribute = 'name';
 

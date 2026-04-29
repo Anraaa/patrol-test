@@ -14,10 +14,11 @@ class ShiftResource extends Resource
 {
     protected static ?string $model = Shift::class;
 
+    protected static ?string $navigationGroup = 'Data Master';
 
     protected static ?string $pluralLabel = 'Shift Kerja';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 12;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

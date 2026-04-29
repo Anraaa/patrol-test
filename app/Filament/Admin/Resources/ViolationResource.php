@@ -14,10 +14,11 @@ class ViolationResource extends Resource
 {
     protected static ?string $model = Violation::class;
 
+    protected static ?string $navigationGroup = 'Data Master';
 
     protected static ?string $pluralLabel = 'Jenis Pelanggaran';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 11;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

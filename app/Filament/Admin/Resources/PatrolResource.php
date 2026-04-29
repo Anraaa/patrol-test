@@ -134,7 +134,7 @@ class PatrolResource extends Resource
                                 ->schema([
                                     Forms\Components\Toggle::make('has_violation')
                                         ->label('Ada Temuan / Pelanggar?')
-                                        ->helperText('Aktifkan jika ditemukan karyawan yang melanggar saat patroli ini')
+                                        ->helperText('Aktifkan jika ditemukan pelanggaran saat patroli ini')
                                         ->onColor('danger')
                                         ->offColor('success')
                                         ->onIcon('heroicon-m-exclamation-triangle')
@@ -142,9 +142,6 @@ class PatrolResource extends Resource
                                         ->live()
                                         ->dehydrated(false)
                                         ->default(false)
-                                        ->afterStateHydrated(function ($state, Set $set, $record) {
-                                            $set('has_violation', $record?->employee_id !== null);
-                                        })
                                         ->columnSpanFull(),
                                 ])
                                 ->compact(),
@@ -163,24 +160,19 @@ class PatrolResource extends Resource
                                 ->icon('heroicon-o-identification')
                                 ->visible(fn (Get $get) => (bool) $get('has_violation'))
                                 ->schema([
-                                    Forms\Components\Select::make('employee_id')
-                                        ->label('Karyawan (NIP — Nama)')
-                                        ->relationship('employee', 'name')
-                                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nip} — {$record->name}")
-                                        ->searchable()
-                                        ->preload()
-                                        ->prefixIcon('heroicon-m-magnifying-glass')
-                                        ->live()
-                                        ->required(fn (Get $get) => (bool) $get('has_violation'))
-                                        ->afterStateUpdated(fn (Set $set, ?string $state) =>
-                                            $state ? $set('_group_display', Employee::find($state)?->shfgroup) : $set('_group_display', null)
-                                        ),
+                                    Forms\Components\Placeholder::make('_violation_employee_display')
+                                        ->label('Petugas')
+                                        ->content(function (Get $get) {
+                                            if (!$empId = $get('employee_id')) return '— Pilih petugas terlebih dahulu di atas';
+                                            $employee = \App\Models\Employee::find($empId);
+                                            return $employee ? "{$employee->nip} — {$employee->name}" : '— Tidak ditemukan';
+                                        }),
 
-                                    Forms\Components\Placeholder::make('_group_display')
+                                    Forms\Components\Placeholder::make('_violation_group_display')
                                         ->label('Shift Group')
                                         ->content(function (Get $get) {
-                                            if (!$id = $get('employee_id')) return '— Pilih karyawan dulu';
-                                            return Employee::find($id)?->shfgroup ?? '-';
+                                            if (!$empId = $get('employee_id')) return '— Pilih petugas terlebih dahulu di atas';
+                                            return \App\Models\Employee::find($empId)?->shfgroup ?? '-';
                                         }),
                                 ])
                                 ->columns(2)
@@ -200,6 +192,30 @@ class PatrolResource extends Resource
                                         ->createOptionForm([
                                             Forms\Components\TextInput::make('name')->required()->maxLength(255),
                                         ]),
+                                ])
+                                ->compact(),
+
+                            Forms\Components\Section::make('Petugas Patroli')
+                                ->icon('heroicon-o-user')
+                                ->description('Pilih petugas yang melakukan patroli')
+                                ->schema([
+                                    Forms\Components\Select::make('employee_id')
+                                        ->label('Petugas Patroli (NIP — Nama)')
+                                        ->relationship('employee', 'name')
+                                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nip} — {$record->name}")
+                                        ->searchable()
+                                        ->preload()
+                                        ->prefixIcon('heroicon-m-magnifying-glass')
+                                        ->columnSpanFull()
+                                        ->helperText('Pilih petugas untuk menampilkan informasi shift group'),
+
+                                    Forms\Components\Placeholder::make('_employee_group_display')
+                                        ->label('Shift Group')
+                                        ->content(function (Get $get) {
+                                            if (!$empId = $get('employee_id')) return '— Pilih petugas dulu';
+                                            return \App\Models\Employee::find($empId)?->shfgroup ?? '-';
+                                        })
+                                        ->columnSpanFull(),
                                 ])
                                 ->compact(),
 

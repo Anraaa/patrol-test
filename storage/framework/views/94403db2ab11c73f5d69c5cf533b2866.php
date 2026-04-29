@@ -724,7 +724,13 @@
                         $shift     = $row['shift']    ?? null;
                         $user      = $row['user']     ?? null;
                         $employee  = $row['employee'] ?? null;
+                        
+                        // Get shfgroup - fallback jika kosong
                         $shfgroup  = $employee['shfgroup'] ?? '—';
+                        if (empty($shfgroup)) {
+                            $shfgroup = '—';
+                        }
+                        
                         $signature = $row['signature'] ?? null;
 
                         $shiftName = $shift['name'] ?? null;
@@ -772,7 +778,7 @@
 
                         
                         <td>
-                            <span class="cs-group">
+                            <span class="cs-group" title="Employee: <?php echo e($employee ? json_encode($employee) : 'NULL'); ?>">
                                 <span class="cs-group-dot"></span>
                                 <?php echo e($shfgroup); ?>
 
