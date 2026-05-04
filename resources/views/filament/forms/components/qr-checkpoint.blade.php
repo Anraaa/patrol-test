@@ -138,13 +138,19 @@
         <div x-show="state === 'done'" class="text-center py-6">
             <div class="text-5xl mb-4">✅</div>
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Absensi Berhasil!</h3>
-            <p class="text-xs text-gray-400 mt-2">Klik <strong>Simpan Laporan Patroli</strong> di bawah untuk menyelesaikan.</p>
-            <div class="mt-4 inline-flex items-center gap-2 rounded-lg bg-success-50 dark:bg-success-950/30 border border-success-200 dark:border-success-800 px-4 py-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <p class="text-xs text-gray-400 mt-3">Checkpoint selesai. Sekarang klik tombol di bawah untuk menyimpan laporan.</p>
+            <div class="mt-4 inline-flex items-center gap-2 rounded-lg bg-success-50 dark:bg-success-950/30 border border-success-200 dark:border-success-800 px-4 py-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                 </svg>
-                <span class="text-sm font-medium text-success-700 dark:text-success-300">Foto muka & tanda tangan tersimpan</span>
+                <div class="text-left">
+                    <div class="text-xs font-semibold text-success-700 dark:text-success-300">📷 Foto muka tersimpan</div>
+                    <div class="text-xs font-semibold text-success-700 dark:text-success-300">✍️ Tanda tangan tersimpan</div>
+                </div>
             </div>
+            <button type="button" @click="state = 'sign'" class="mt-4 text-xs text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-700 rounded px-2 py-1 transition-colors">
+                Ulang (Foto & Paraf)
+            </button>
         </div>
 
     </div>

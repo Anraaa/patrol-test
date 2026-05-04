@@ -90,6 +90,12 @@ class CreatePatrol extends CreateRecord
             \Illuminate\Support\Facades\Log::error('Form fill failed', ['error' => $e->getMessage()]);
         }
 
+        // Dispatch Alpine event untuk update state checkpoint di UI
+        $this->dispatch('checkpointStatusUpdated', [
+            'completed' => true,
+            'message' => '✅ Absensi berhasil disimpan! Sekarang klik "💾 Simpan Laporan Patroli" untuk menyelesaikan.'
+        ]);
+
         Notification::make()
             ->title('Checkpoint Terekam')
             ->body('📍 Foto muka & tanda tangan berhasil disimpan. Klik "Simpan Laporan" untuk menyelesaikan.')
@@ -152,6 +158,20 @@ class CreatePatrol extends CreateRecord
     protected function getFormActions(): array
     {
         return [];
+    }
+
+    protected function beforeValidate(): void
+    {
+        // Validasi: Checkpoint WAJIB selesai sebelum submit form
+        if (! $this->checkpointCompleted) {
+            \Filament\Notifications\Notification::make()
+                ->title('Absensi Belum Lengkap')
+                ->body('📍 Anda harus menyelesaikan photo & tanda tangan terlebih dahulu. Klik "✅ Selesai & Simpan" di Step 3.')
+                ->danger()
+                ->send();
+            
+            $this->halt();
+        }
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

@@ -245,6 +245,20 @@ class PatrolResource extends Resource
                         ->icon('heroicon-o-camera')
                         ->description('Foto muka dan tanda tangan PIC patroli')
                         ->schema([
+                            Forms\Components\Section::make()
+                                ->schema([
+                                    Forms\Components\Placeholder::make('_checkpoint_requirement')
+                                        ->label('')
+                                        ->content(new \Illuminate\Support\HtmlString(
+                                            '<div class="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300">'
+                                            . '⚠️ <strong>Checkpoint Wajib Selesai</strong> — Anda harus menyelesaikan foto muka dan tanda tangan terlebih dahulu sebelum bisa menyimpan laporan patroli. '
+                                            . 'Setelah foto & paraf tersimpan, baru tombol "💾 Simpan Laporan Patroli" dapat digunakan.'
+                                            . '</div>'
+                                        ))
+                                        ->columnSpanFull(),
+                                ])
+                                ->compact(),
+
                             Forms\Components\Hidden::make('checkpoint_face_photo_b64')
                                 ->dehydrated(false),
                             Forms\Components\Hidden::make('checkpoint_signature')
