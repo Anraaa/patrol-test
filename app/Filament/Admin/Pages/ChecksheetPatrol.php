@@ -92,8 +92,8 @@ class ChecksheetPatrol extends Page implements HasForms
     {
         $query = Patrol::with([
             'shift',
-            'user',
-            'employee',  // ✅ Load employee dengan shfgroup-nya
+            'user.employee',  // ✅ Load user dengan employeenya (untuk group PIC)
+            'employee',  // Load employee yang melanggar (jika ada)
             'location',
             'checkpoints' => fn($q) => $q->orderBy('scanned_at', 'asc')
         ])

@@ -486,7 +486,7 @@ Route::get('/admin/patrols/checksheet/export-pdf', function () {
     $shiftId    = request('shift_id');
     $locationId = request('location_id');
 
-    $query = \App\Models\Patrol::with(['shift', 'user', 'employee.department', 'location', 'checkpoints'])
+    $query = \App\Models\Patrol::with(['shift', 'user.employee', 'employee', 'location', 'checkpoints'])
         ->orderBy('patrol_time', 'desc');
 
     if ($dateFrom) {
@@ -552,7 +552,7 @@ Route::get('/admin/patrols/checksheet/export-excel', function () {
     $shiftId    = request('shift_id');
     $locationId = request('location_id');
 
-    $query = \App\Models\Patrol::with(['shift', 'user', 'employee.department', 'location', 'checkpoints'])
+    $query = \App\Models\Patrol::with(['shift', 'user.employee', 'employee', 'location', 'checkpoints'])
         ->orderBy('patrol_time', 'desc');
 
     if ($dateFrom) {
@@ -615,12 +615,12 @@ Route::get('/admin/patrols/checksheet/export-excel', function () {
             $row = 5;
             foreach ($patrols as $i => $patrol) {
                 $patrolTime = $patrol->patrol_time ? \Carbon\Carbon::parse($patrol->patrol_time) : null;
-                $dept = $patrol->employee?->department;
+                $picGroup   = $patrol->user?->employee?->shfgroup;
 
                 $sheet->setCellValue('A' . $row, $i + 1);
                 $sheet->setCellValue('B' . $row, $patrolTime?->format('d-m-Y') ?? '');
                 $sheet->setCellValue('C' . $row, $patrol->shift?->name ?? '');
-                $sheet->setCellValue('D' . $row, $dept?->name ?? '');
+                $sheet->setCellValue('D' . $row, $picGroup ?? '');
                 $sheet->setCellValue('E' . $row, $patrolTime?->format('H:i') ?? '');
                 $sheet->setCellValue('F' . $row, $patrol->user?->name ?? '');
                 $sheet->setCellValue('G' . $row, ''); // Paraf column left empty for manual signature

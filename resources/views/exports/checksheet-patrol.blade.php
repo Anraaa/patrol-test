@@ -78,7 +78,7 @@
             @forelse ($patrols as $i => $patrol)
                 @php
                     $pt       = $patrol->patrol_time ? \Carbon\Carbon::parse($patrol->patrol_time) : null;
-                    $shfgroup = $patrol->employee?->shfgroup ?? '—';
+                    $shfgroup = $patrol->user?->employee?->shfgroup ?? '—';
                     $sig      = $patrol->signature;
                     if ($sig && !str_starts_with($sig, 'data:')) {
                         try {

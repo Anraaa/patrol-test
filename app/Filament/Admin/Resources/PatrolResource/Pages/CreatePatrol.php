@@ -165,31 +165,46 @@ class CreatePatrol extends CreateRecord
         }
 
         // ── Set QR validation data if user has scanned QR location ──────────
-        // User sudah scan QR lokasi sebelum isi form
-        // Catat waktu validasi = SEKARANG (saat form disimpan), bukan waktu scan lama
         $qrLocationScanned = session('qr_location_scanned');
         
         if ($qrLocationScanned) {
-            // QR sudah discan → catat validasi dengan waktu sekarang
             $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
-            $data['qr_scanned_at'] = now();  // SEKARANG (bukan waktu scan lama)
+            $data['qr_scanned_at'] = now();
             $data['qr_scanned_ip'] = request()?->ip();
             
-            // Debug: Log untuk memastikan
-            \Illuminate\Support\Facades\Log::info('QR Validation Set', [
-                'timestamp' => $data['qr_scanned_at'],
-                'qr_location' => $qrLocationScanned,
-            ]);
-            
-            // Hapus session setelah digunakan - agar tidak terulang
             session()->forget('qr_location_scanned');
             session()->forget('qr_location_scanned_at');
         }
-        // ── Fallback: Jika checkpoint completed tanpa location scan ────────
         elseif ($this->checkpointCompleted && $this->checkpointLocationId) {
             $data['qr_code_token'] = \Illuminate\Support\Str::random(32);
             $data['qr_scanned_at'] = now();
             $data['qr_scanned_ip'] = request()?->ip();
+        }
+
+        // ── Process checkpoint face_photo & signature → save to Patrol ─────
+        if ($this->checkpointFacePhotoB64 && str_starts_with($this->checkpointFacePhotoB64, 'data:')) {
+            try {
+                [$meta, $b64] = explode(',', $this->checkpointFacePhotoB64, 2);
+                $ext  = str_contains($meta, 'jpeg') ? 'jpg' : 'png';
+                $path = 'checkpoint-face-photos/' . uniqid('face_') . '.' . $ext;
+                Storage::disk('public')->put($path, base64_decode($b64));
+                $data['face_photo'] = $path;
+                \Illuminate\Support\Facades\Log::info('Face photo saved to patrol', ['path' => $path]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Face photo save failed', ['error' => $e->getMessage()]);
+            }
+        }
+
+        if ($this->checkpointSignature && str_starts_with($this->checkpointSignature, 'data:')) {
+            try {
+                [, $b64] = explode(',', $this->checkpointSignature, 2);
+                $path = 'checkpoint-signatures/' . uniqid('sig_') . '.png';
+                Storage::disk('public')->put($path, base64_decode($b64));
+                $data['signature'] = $path;
+                \Illuminate\Support\Facades\Log::info('Signature saved to patrol', ['path' => $path]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Signature save failed', ['error' => $e->getMessage()]);
+            }
         }
 
         return $data;

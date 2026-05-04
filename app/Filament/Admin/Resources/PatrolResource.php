@@ -245,8 +245,10 @@ class PatrolResource extends Resource
                         ->icon('heroicon-o-camera')
                         ->description('Foto muka dan tanda tangan PIC patroli')
                         ->schema([
-                            Forms\Components\Hidden::make('checkpoint_face_photo_b64'),
-                            Forms\Components\Hidden::make('checkpoint_signature'),
+                            Forms\Components\Hidden::make('checkpoint_face_photo_b64')
+                                ->dehydrated(false),
+                            Forms\Components\Hidden::make('checkpoint_signature')
+                                ->dehydrated(false),
 
                             Forms\Components\View::make('filament.forms.components.qr-checkpoint')
                                 ->columnSpanFull(),
