@@ -44,9 +44,22 @@ class Patrol extends Model
     {
         if (!$value) return null;
         
-        // Parse the database value (stored in UTC) and convert to app timezone
-        $dateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, 'UTC');
-        return $dateTime->setTimezone(config('app.timezone'));
+        // Value sudah Carbon karena casting, tinggal convert timezone
+        if ($value instanceof \Carbon\Carbon) {
+            return $value->setTimezone(config('app.timezone'));
+        }
+        
+        // Fallback jika value string
+        if (is_string($value)) {
+            try {
+                $dateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, 'UTC');
+                return $dateTime->setTimezone(config('app.timezone'));
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        
+        return $value;
     }
 
     /**
@@ -60,13 +73,17 @@ class Patrol extends Model
         }
 
         // Convert app timezone to UTC for storage
-        if (is_string($value)) {
-            $value = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
-        } elseif ($value instanceof \Carbon\Carbon) {
-            $value = $value->setTimezone(config('app.timezone'));
+        if ($value instanceof \Carbon\Carbon) {
+            $this->attributes['qr_scanned_at'] = $value->setTimezone('UTC')->format('Y-m-d H:i:s');
+        } elseif (is_string($value) && !empty($value)) {
+            try {
+                $parsed = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
+                $this->attributes['qr_scanned_at'] = $parsed->setTimezone('UTC')->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // Jika parsing gagal, coba format lain atau gunakan strtotime
+                $this->attributes['qr_scanned_at'] = null;
+            }
         }
-
-        $this->attributes['qr_scanned_at'] = $value->setTimezone('UTC')->format('Y-m-d H:i:s');
     }
 
     /**
@@ -76,9 +93,22 @@ class Patrol extends Model
     {
         if (!$value) return null;
         
-        // Parse the database value (stored in UTC) and convert to app timezone
-        $dateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, 'UTC');
-        return $dateTime->setTimezone(config('app.timezone'));
+        // Value sudah Carbon karena casting, tinggal convert timezone
+        if ($value instanceof \Carbon\Carbon) {
+            return $value->setTimezone(config('app.timezone'));
+        }
+        
+        // Fallback jika value string
+        if (is_string($value)) {
+            try {
+                $dateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, 'UTC');
+                return $dateTime->setTimezone(config('app.timezone'));
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        
+        return $value;
     }
 
     /**
@@ -92,13 +122,17 @@ class Patrol extends Model
         }
 
         // Convert app timezone to UTC for storage
-        if (is_string($value)) {
-            $value = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
-        } elseif ($value instanceof \Carbon\Carbon) {
-            $value = $value->setTimezone(config('app.timezone'));
+        if ($value instanceof \Carbon\Carbon) {
+            $this->attributes['patrol_time'] = $value->setTimezone('UTC')->format('Y-m-d H:i:s');
+        } elseif (is_string($value) && !empty($value)) {
+            try {
+                $parsed = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
+                $this->attributes['patrol_time'] = $parsed->setTimezone('UTC')->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // Jika parsing gagal, coba format lain atau gunakan strtotime
+                $this->attributes['patrol_time'] = null;
+            }
         }
-
-        $this->attributes['patrol_time'] = $value->setTimezone('UTC')->format('Y-m-d H:i:s');
     }
 
     public function user(): BelongsTo
