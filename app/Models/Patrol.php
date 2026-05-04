@@ -116,8 +116,9 @@ class Patrol extends Model
      */
     public function setPatrolTimeAttribute($value)
     {
+        // Jika tidak ada value, gunakan current timestamp
         if (!$value) {
-            $this->attributes['patrol_time'] = null;
+            $this->attributes['patrol_time'] = \Carbon\Carbon::now('UTC')->format('Y-m-d H:i:s');
             return;
         }
 
@@ -129,9 +130,12 @@ class Patrol extends Model
                 $parsed = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'));
                 $this->attributes['patrol_time'] = $parsed->setTimezone('UTC')->format('Y-m-d H:i:s');
             } catch (\Exception $e) {
-                // Jika parsing gagal, coba format lain atau gunakan strtotime
-                $this->attributes['patrol_time'] = null;
+                // Jika parsing gagal, gunakan current timestamp
+                $this->attributes['patrol_time'] = \Carbon\Carbon::now('UTC')->format('Y-m-d H:i:s');
             }
+        } else {
+            // Tipe data tidak dikenali, gunakan current timestamp
+            $this->attributes['patrol_time'] = \Carbon\Carbon::now('UTC')->format('Y-m-d H:i:s');
         }
     }
 
