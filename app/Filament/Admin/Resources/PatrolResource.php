@@ -52,13 +52,13 @@ class PatrolResource extends Resource
             ->schema([
                 Forms\Components\Wizard::make([
 
-                    Forms\Components\Wizard\Step::make('Info Patroli')
-                        ->icon('heroicon-o-clock')
-                        ->description('Waktu, shift, dan petugas')
+                    Forms\Components\Wizard\Step::make('PIC Patroli')
+                        ->icon('heroicon-o-user-circle')
+                        ->description('Petugas yang melakukan patroli')
                         ->schema([
 
                             Forms\Components\Section::make('Waktu & Shift Patroli')
-                                ->description('Kapan patroli dilakukan dan siapa yang bertugas')
+                                ->description('Kapan patroli dilakukan')
                                 ->icon('heroicon-o-clock')
                                 ->schema([
                                     Forms\Components\DateTimePicker::make('patrol_time')
@@ -103,12 +103,12 @@ class PatrolResource extends Resource
                                 ->columns(2)
                                 ->compact(),
 
-                            Forms\Components\Section::make('Petugas Pelapor (PIC)')
-                                ->description('Satpam yang menginput laporan ini')
-                                ->icon('heroicon-o-user-circle')
+                            Forms\Components\Section::make('PIC Patroli (Petugas Pelapor)')
+                                ->description('Satpam yang melakukan dan menginput laporan patroli ini')
+                                ->icon('heroicon-o-shield-check')
                                 ->schema([
                                     Forms\Components\Select::make('user_id')
-                                        ->label('PIC Patroli')
+                                        ->label('PIC Patroli (Petugas)')
                                         ->relationship('user', 'name')
                                         ->default(fn () => auth()->id())
                                         ->required()
@@ -125,58 +125,10 @@ class PatrolResource extends Resource
                                 ->compact(),
                         ]),
 
-                    Forms\Components\Wizard\Step::make('Karyawan & Pelanggaran')
-                        ->icon('heroicon-o-identification')
-                        ->description('Apakah ada temuan atau pelanggar?')
+                    Forms\Components\Wizard\Step::make('Lokasi & Temuan Pelanggar')
+                        ->icon('heroicon-o-map-pin')
+                        ->description('Area dan karyawan yang melanggar (jika ada)')
                         ->schema([
-
-                            Forms\Components\Section::make()
-                                ->schema([
-                                    Forms\Components\Toggle::make('has_violation')
-                                        ->label('Ada Temuan / Pelanggar?')
-                                        ->helperText('Aktifkan jika ditemukan pelanggaran saat patroli ini')
-                                        ->onColor('danger')
-                                        ->offColor('success')
-                                        ->onIcon('heroicon-m-exclamation-triangle')
-                                        ->offIcon('heroicon-m-check-circle')
-                                        ->live()
-                                        ->dehydrated(false)
-                                        ->default(false)
-                                        ->columnSpanFull(),
-                                ])
-                                ->compact(),
-
-                            Forms\Components\Placeholder::make('_no_violation_info')
-                                ->label('')
-                                ->content(new \Illuminate\Support\HtmlString(
-                                    '<div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">'
-                                    . '✅ <strong>Tidak Ada Temuan</strong> — Patroli selesai tanpa pelanggaran. Lanjutkan ke step berikutnya untuk foto & tanda tangan.'
-                                    . '</div>'
-                                ))
-                                ->visible(fn (Get $get) => ! (bool) $get('has_violation'))
-                                ->columnSpanFull(),
-
-                            Forms\Components\Section::make('Identitas Karyawan Pelanggar')
-                                ->icon('heroicon-o-identification')
-                                ->visible(fn (Get $get) => (bool) $get('has_violation'))
-                                ->schema([
-                                    Forms\Components\Placeholder::make('_violation_employee_display')
-                                        ->label('Petugas')
-                                        ->content(function (Get $get) {
-                                            if (!$empId = $get('employee_id')) return '— Pilih petugas terlebih dahulu di atas';
-                                            $employee = \App\Models\Employee::find($empId);
-                                            return $employee ? "{$employee->nip} — {$employee->name}" : '— Tidak ditemukan';
-                                        }),
-
-                                    Forms\Components\Placeholder::make('_violation_group_display')
-                                        ->label('Shift Group')
-                                        ->content(function (Get $get) {
-                                            if (!$empId = $get('employee_id')) return '— Pilih petugas terlebih dahulu di atas';
-                                            return \App\Models\Employee::find($empId)?->shfgroup ?? '-';
-                                        }),
-                                ])
-                                ->columns(2)
-                                ->compact(),
 
                             Forms\Components\Section::make('Lokasi Patroli')
                                 ->icon('heroicon-o-map-pin')
@@ -195,24 +147,52 @@ class PatrolResource extends Resource
                                 ])
                                 ->compact(),
 
-                            Forms\Components\Section::make('Petugas Patroli')
-                                ->icon('heroicon-o-user')
-                                ->description('Pilih petugas yang melakukan patroli')
+                            Forms\Components\Section::make()
+                                ->schema([
+                                    Forms\Components\Toggle::make('has_violation')
+                                        ->label('Ada Temuan / Karyawan Melanggar?')
+                                        ->helperText('Aktifkan jika ada pelanggaran atau karyawan yang melanggar saat patroli ini')
+                                        ->onColor('danger')
+                                        ->offColor('success')
+                                        ->onIcon('heroicon-m-exclamation-triangle')
+                                        ->offIcon('heroicon-m-check-circle')
+                                        ->live()
+                                        ->dehydrated(false)
+                                        ->default(false)
+                                        ->columnSpanFull(),
+                                ])
+                                ->compact(),
+
+                            Forms\Components\Placeholder::make('_no_violation_info')
+                                ->label('')
+                                ->content(new \Illuminate\Support\HtmlString(
+                                    '<div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">'
+                                    . '✅ <strong>Patroli Aman</strong> — Tidak ada karyawan yang melanggar. Lanjutkan ke step berikutnya untuk foto & tanda tangan.'
+                                    . '</div>'
+                                ))
+                                ->visible(fn (Get $get) => ! (bool) $get('has_violation'))
+                                ->columnSpanFull(),
+
+                            Forms\Components\Section::make('Karyawan yang Melanggar')
+                                ->icon('heroicon-o-user-circle')
+                                ->description('Pilih karyawan yang ditemukan melanggar')
+                                ->visible(fn (Get $get) => (bool) $get('has_violation'))
                                 ->schema([
                                     Forms\Components\Select::make('employee_id')
-                                        ->label('Petugas Patroli (NIP — Nama)')
+                                        ->label('Karyawan Pelanggar (NIP — Nama)')
                                         ->relationship('employee', 'name')
                                         ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nip} — {$record->name}")
                                         ->searchable()
                                         ->preload()
-                                        ->prefixIcon('heroicon-m-magnifying-glass')
+                                        ->prefixIcon('heroicon-m-user-circle')
                                         ->columnSpanFull()
-                                        ->helperText('Pilih petugas untuk menampilkan informasi shift group'),
+                                        ->required(fn (Get $get) => (bool) $get('has_violation'))
+                                        ->helperText('Pilih karyawan yang melanggar untuk menampilkan informasi shift group'),
 
                                     Forms\Components\Placeholder::make('_employee_group_display')
                                         ->label('Shift Group')
                                         ->content(function (Get $get) {
-                                            if (!$empId = $get('employee_id')) return '— Pilih petugas dulu';
+                                            if (!$empId = $get('employee_id')) return '— Pilih karyawan dulu';
                                             return \App\Models\Employee::find($empId)?->shfgroup ?? '-';
                                         })
                                         ->columnSpanFull(),
@@ -263,7 +243,7 @@ class PatrolResource extends Resource
 
                     Forms\Components\Wizard\Step::make('Checkpoint & Absensi')
                         ->icon('heroicon-o-camera')
-                        ->description('Foto muka dan tanda tangan petugas')
+                        ->description('Foto muka dan tanda tangan PIC patroli')
                         ->schema([
                             Forms\Components\Hidden::make('checkpoint_face_photo_b64'),
                             Forms\Components\Hidden::make('checkpoint_signature'),
