@@ -22,6 +22,10 @@ class ScanQrCode extends Page
     public ?Patrol $scannedPatrol = null;
     public ?string $statusMessage = null;
     public ?string $statusType = null;
+    public ?float $userLat = null;
+    public ?float $userLng = null;
+    public bool $isGpsVerifying = false;
+    public ?string $locationVerificationStatus = null;
 
     public function mount(): void
     {
@@ -59,6 +63,37 @@ class ScanQrCode extends Page
             return;
         }
 
+        // Cek validasi lokasi jika lokasi memiliki GPS requirement
+        if ($patrol->location && $patrol->location->require_gps_validation) {
+            if ($this->userLat === null || $this->userLng === null) {
+                $this->statusType = 'warning';
+                $this->statusMessage = 'Menunggu verifikasi GPS lokasi...';
+                $this->isGpsVerifying = true;
+                $this->dispatch('requestGpsLocation');
+                return;
+            }
+
+            // Hitung jarak antara user dan lokasi
+            $distance = $this->calculateDistance(
+                $this->userLat,
+                $this->userLng,
+                $patrol->location->latitude,
+                $patrol->location->longitude
+            );
+
+            $maxRadius = $patrol->location->radius_meters ?? 50; // default 50 meter
+
+            if ($distance > $maxRadius) {
+                $this->statusType = 'error';
+                $this->statusMessage = "Anda berada {$distance}m dari lokasi. Harus dalam radius {$maxRadius}m dari titik '{$patrol->location->name}'";
+                $this->locationVerificationStatus = "Distance: {$distance}m / Radius: {$maxRadius}m";
+                $this->qrToken = null;
+                return;
+            }
+
+            $this->locationVerificationStatus = "✓ Verifikasi lokasi: {$distance}m dari titik";
+        }
+
         // Validate with QR code
         if ($patrol->validateWithQrCode($this->qrToken, request()->ip())) {
             $userName = $patrol->user?->name ?? 'Petugas';
@@ -82,6 +117,44 @@ class ScanQrCode extends Page
         }
 
         $this->qrToken = null;
+        $this->isGpsVerifying = false;
+    }
+
+    /**
+     * Receive GPS coordinates from frontend (Haversine formula)
+     */
+    #[On('gpsLocationReceived')]
+    public function receiveGpsLocation(array $data): void
+    {
+        $this->userLat = $data['latitude'];
+        $this->userLng = $data['longitude'];
+        $this->isGpsVerifying = false;
+        
+        // Retry scan validation dengan GPS data yang baru
+        if (!empty($this->qrToken)) {
+            $this->handleQrScan();
+        }
+    }
+
+    /**
+     * Calculate distance between two coordinates (Haversine formula)
+     * Returns distance in meters
+     */
+    private function calculateDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $earthRadiusM = 6371000; // Earth radius in meters
+        
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+        
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLng / 2) * sin($dLng / 2);
+        
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        $distance = $earthRadiusM * $c;
+        
+        return round($distance, 1);
     }
 
     protected function getFormActions(): array

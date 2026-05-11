@@ -23,21 +23,45 @@
                     <input 
                         wire:model="qrToken"
                         type="text"
+                        id="qrTokenInput"
                         placeholder="Masukkan atau pindai token QR code..."
                         @keydown.enter="$wire.handleQrScan()"
                         class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
                         autofocus
                     />
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        💡 PDT Scanner: Langsung validasi saat selesai scan (auto-detect)
+                    </p>
                 </div>
+
+                {{-- GPS Status Indicator --}}
+                @if($isGpsVerifying)
+                    <div class="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/30 px-4 py-3">
+                        <svg class="h-5 w-5 text-blue-600 dark:text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">Mendeteksi lokasi GPS...</span>
+                    </div>
+                @endif
+
+                @if($locationVerificationStatus)
+                    <div class="flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/30 px-4 py-3">
+                        <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-sm font-semibold text-emerald-800 dark:text-emerald-200">{{ $locationVerificationStatus }}</span>
+                    </div>
+                @endif
 
                 <button
                     wire:click="handleQrScan"
-                    class="w-full rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 px-4 py-3 text-white font-semibold shadow-lg hover:shadow-xl hover:from-primary-600 hover:to-primary-700 transition"
+                    {{ $isGpsVerifying ? 'disabled' : '' }}
+                    class="w-full rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 px-4 py-3 text-white font-semibold shadow-lg hover:shadow-xl hover:from-primary-600 hover:to-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <svg class="inline-block h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 9h.01M9 12h.01M9 15h.01M12 9h.01M12 12h.01M12 15h.01M15 9h.01M15 12h.01M15 15h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
-                    Validasi
+                    {{ $isGpsVerifying ? 'Validasi Lokasi...' : 'Validasi' }}
                 </button>
             </div>
         </div>
@@ -186,4 +210,117 @@
             </ul>
         </div>
     </div>
+
+    <script>
+        /**
+         * PDT Scanner Auto-Submission & GPS Detection
+         * ============================================
+         * - Detects when PDT scanner finishes reading QR code
+         * - Auto-captures GPS location if location validation required
+         * - Auto-submits form without manual click
+         */
+        
+        const qrTokenInput = document.getElementById('qrTokenInput');
+        let lastTokenValue = '';
+        let gpsDetectionTimeout = null;
+
+        // Listen for 'requestGpsLocation' event from Livewire
+        window.addEventListener('requestGpsLocation', function() {
+            captureGpsLocation();
+        });
+
+        // Detect PDT scanner input completion
+        // PDT scanners typically clear the field and input new data in rapid succession
+        qrTokenInput.addEventListener('change', function() {
+            const currentValue = this.value.trim();
+            
+            // Debounce: wait for scanner to finish (PDT sends all data quickly)
+            clearTimeout(gpsDetectionTimeout);
+            
+            gpsDetectionTimeout = setTimeout(() => {
+                if (currentValue && currentValue !== lastTokenValue) {
+                    lastTokenValue = currentValue;
+                    
+                    // Auto-trigger validation with GPS detection
+                    console.log('🔍 PDT Scanner detected. Token:', currentValue);
+                    
+                    // First try to get GPS if available
+                    if (navigator.geolocation) {
+                        captureGpsLocation();
+                    } else {
+                        // No GPS, proceed with validation only
+                        window.Livewire.dispatch('handleQrScan');
+                    }
+                }
+            }, 500); // Wait 500ms for scanner to finish
+        });
+
+        // Manual input detection for non-PDT scenarios
+        qrTokenInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const currentValue = this.value.trim();
+                if (currentValue) {
+                    lastTokenValue = currentValue;
+                    // Manual Enter press - try GPS then submit
+                    if (navigator.geolocation) {
+                        captureGpsLocation();
+                    } else {
+                        window.Livewire.dispatch('handleQrScan');
+                    }
+                }
+            }
+        });
+
+        /**
+         * Capture user's GPS location
+         * Sends coordinates back to Livewire component
+         */
+        function captureGpsLocation() {
+            if (!navigator.geolocation) {
+                console.warn('⚠️ GPS not available, proceeding with QR validation only');
+                window.Livewire.dispatch('handleQrScan');
+                return;
+            }
+
+            console.log('📍 Requesting GPS location...');
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    console.log(`✅ GPS captured: ${lat.toFixed(6)}, ${lng.toFixed(6)} (±${accuracy.toFixed(0)}m)`);
+                    
+                    // Send coordinates to Livewire
+                    window.Livewire.dispatch('gpsLocationReceived', {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: accuracy
+                    });
+                },
+                function(error) {
+                    console.warn('⚠️ GPS error:', error.message);
+                    
+                    // Proceed without GPS if user denies or GPS unavailable
+                    if (error.code !== 1) { // Not PERMISSION_DENIED
+                        console.log('Proceeding with QR validation (GPS unavailable)');
+                        window.Livewire.dispatch('handleQrScan');
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 8000,        // 8 second timeout
+                    maximumAge: 0         // Don't use cached position
+                }
+            );
+        }
+
+        // Expose for manual debugging
+        window.manualScanRequest = function() {
+            if (qrTokenInput.value) {
+                qrTokenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        };
+    </script>
 </x-filament::page>

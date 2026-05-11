@@ -11,7 +11,7 @@ class Location extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'uuid', 'latitude', 'longitude', 'radius_meters'];
+    protected $fillable = ['name', 'uuid', 'latitude', 'longitude', 'radius_meters', 'require_gps_validation'];
 
     protected function casts(): array
     {
@@ -19,6 +19,7 @@ class Location extends Model
             'latitude'      => 'double',
             'longitude'     => 'double',
             'radius_meters' => 'integer',
+            'require_gps_validation' => 'boolean',
         ];
     }
 

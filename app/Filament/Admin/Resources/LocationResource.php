@@ -78,6 +78,12 @@ class LocationResource extends Resource
                             ->prefixIcon('heroicon-m-arrows-pointing-out')
                             ->columnSpanFull(),
 
+                        Forms\Components\Toggle::make('require_gps_validation')
+                            ->label('Wajibkan Validasi GPS')
+                            ->helperText('Aktifkan untuk memastikan petugas berada di lokasi yang tepat saat scan QR code')
+                            ->default(true)
+                            ->columnSpanFull(),
+
                         Forms\Components\Placeholder::make('_geo_notice')
                             ->label('')
                             ->content(new \Illuminate\Support\HtmlString(
