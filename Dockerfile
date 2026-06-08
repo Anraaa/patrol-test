@@ -34,9 +34,4 @@ EXPOSE 8080
 
 COPY Caddyfile /etc/caddy/Caddyfile
 
-CMD php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan view:clear && \
-    php artisan optimize ; \
-    php artisan migrate --force || echo "Migration skipped, will retry later" ; \
-    frankenphp run --config /etc/caddy/Caddyfile
+CMD ["sh", "-c", "php artisan config:clear && php artisan cache:clear && php artisan view:clear && php artisan optimize ; php artisan migrate --force || echo 'Migration skipped, will retry later' ; frankenphp run --config /etc/caddy/Caddyfile"]
