@@ -32,10 +32,11 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 
 EXPOSE 8080
 
-# Note: In production, it's better to run 'optimize' during build, 
-# but keeping your CMD structure for runtime clearing.
+COPY Caddyfile /etc/caddy/Caddyfile
+
 CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan view:clear && \
     php artisan optimize && \
-    php artisan serve --host=0.0.0.0 --port=8080
+    php artisan migrate --force && \
+    frankenphp run --config /etc/caddy/Caddyfile

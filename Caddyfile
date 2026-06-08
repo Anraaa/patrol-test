@@ -1,0 +1,13 @@
+{
+    auto_https off
+    frankenphp
+}
+
+:8080 {
+    root * /app/public
+    php_fastcgi unix//var/run/php/php8.2-fpm.sock
+    file_server
+    
+    header /assets/* Cache-Control "public, max-age=31536000, immutable"
+    header /favicon.ico Cache-Control "public, max-age=86400"
+}
