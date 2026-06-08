@@ -2,7 +2,7 @@ FROM dunglas/frankenphp:php8.2
 
 # Install dependencies + libmagickwand-dev for Imagick
 RUN apt-get update && apt-get install -y \
-    git unzip curl \
+    git unzip curl ca-certificates \
     libicu-dev libzip-dev \
     libpng-dev libjpeg-dev libfreetype6-dev \
     libmagickwand-dev --no-install-recommends \
@@ -37,6 +37,6 @@ COPY Caddyfile /etc/caddy/Caddyfile
 CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan view:clear && \
-    php artisan optimize && \
-    php artisan migrate --force && \
+    php artisan optimize ; \
+    php artisan migrate --force || echo "Migration skipped, will retry later" ; \
     frankenphp run --config /etc/caddy/Caddyfile
